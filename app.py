@@ -1,4 +1,4 @@
-from flask import Flask, url_for, request
+from flask import Flask, url_for, request, redirect
 import datetime
 app = Flask(__name__)
 
@@ -28,7 +28,7 @@ def author():
            </body>
         </html>"""
 
-@app.route("/image")
+@app.route("/lab1/image")
 def image():
     path = url_for('static', filename='oak.jpeg')
     return (
@@ -63,3 +63,8 @@ def conter():
   </body>
 </html>
 '''
+
+@app.route("/info")
+def info():
+    return redirect("/author")
+
