@@ -1,5 +1,5 @@
-from flask import Flask, url_for, request, redirect
-import datetime
+from flask import Flask, url_for, request, redirect, make_response, send_from_directory
+import datetime, os
 app = Flask(__name__)
 
 @app.errorhandler(404)
@@ -51,6 +51,10 @@ def author():
            </body>
         </html>"""
 
+from flask import Flask, url_for, make_response
+
+app = Flask(__name__)
+
 @app.route("/lab1/image")
 def image():
     path = url_for('static', filename='oak.jpeg')
@@ -77,7 +81,7 @@ def image():
 @app.route("/lab1/counter")
 def counter():
     global count
-    count += 1
+    count = 0
     time = datetime.datetime.today()
     url = request.url
     client_ip = request.remote_addr
