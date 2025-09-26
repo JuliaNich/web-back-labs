@@ -14,7 +14,10 @@ def web():
                <h1>web-сервер на flask</h1>
                <a href='/author'>author</a>
            </body>
-        </html>"""
+        </html>""", 200, {
+            'X-server': 'sample',
+            'Content-Type': 'text/plain; charset=utf-8'
+            }
 
 @app.route("/author")
 def author():
@@ -35,15 +38,19 @@ def author():
 @app.route("/lab1/image")
 def image():
     path = url_for('static', filename='oak.jpeg')
-    return (
-        "<!doctype html>"
-        "<html>"
-        "   <body>"
-        "       <h1>Дуб</h1>"
-        f"       <img src='{path}'>"
-        "   </body>"
-        "</html>"
-    )
+    css = url_for('static', filename='lab1.css')
+    return f"""
+<!doctype html>
+<html>
+   <head>
+      <link rel='stylesheet' href='{css}'>
+   </head>
+   <body>
+      <h1>Дуб</h1>
+      <img src='{path}'>
+   </body>
+</html>
+"""
 
 count = 0
 
