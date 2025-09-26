@@ -67,6 +67,7 @@ def image():
    </body>
 </html>
 """
+   
 
 @app.route("/lab1/counter")
 def counter():
@@ -176,5 +177,13 @@ def error_405(e):
 @app.route("/lab1/418")
 def error_418():
     return "Ошибка 418 — Ошибка", 418
+
+@app.route("/lab1/error")
+def error():
+    return 1 / 0  
+
+@app.errorhandler(500)
+def error_500(e):
+    return "Ошибка 500 — внутренняя ошибка сервера", 500
 
 
