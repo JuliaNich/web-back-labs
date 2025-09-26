@@ -4,7 +4,8 @@ app = Flask(__name__)
 
 @app.errorhandler(404)
 def not_found(err):
-    return "нет такой страницы", 404
+    return """ такой стр нет
+""", 404
 
 @app.route("/lab1/web")
 def web():
@@ -137,3 +138,28 @@ def lab1():
    </body>
 </html>
 """
+@app.errorhandler(400)
+def error_400(e):
+    return "Ошибка 400 — Неверный запрос", 400
+
+@app.errorhandler(401)
+def error_401(e):
+    return "Ошибка 401 — Неавторизован", 401
+
+@app.route("/lab1/402")
+def error_402():
+    return "Ошибка 402 — Требуется оплата", 402
+
+@app.errorhandler(403)
+def error_403(e):
+    return "Ошибка 403 — Доступ запрещён", 403
+
+@app.errorhandler(405)
+def error_405(e):
+    return "Ошибка 405 — Метод не разрешён", 405
+
+@app.route("/lab1/418")
+def error_418():
+    return "Ошибка 418 — Ошибка", 418
+
+
