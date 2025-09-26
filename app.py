@@ -55,7 +55,7 @@ def author():
 def image():
     path = url_for('static', filename='oak.jpeg')
     css = url_for('static', filename='lab1.css')
-    return f"""
+    html = f"""
 <!doctype html>
 <html>
    <head>
@@ -67,7 +67,12 @@ def image():
    </body>
 </html>
 """
-   
+    return html, 200, {
+        "Content-Language": "ru",
+        "X-Student": "Юлия",
+        "X-Lab": "Lab1"
+    }
+
 
 @app.route("/lab1/counter")
 def counter():
@@ -151,6 +156,16 @@ def lab1():
       базовые возможности.
       <br><br>
       <a href='/'>На главную</a>
+      <h2>Список роутов</h2>
+      <ul>
+         <li><a href='/lab1/web'>/lab1/web</a></li>
+         <li><a href='/lab1/author'>/lab1/author</a></li>
+         <li><a href='/lab1/image'>/lab1/image</a></li>
+         <li><a href='/lab1/counter'>/lab1/counter</a></li>
+         <li><a href='/lab1/info'>/lab1/info</a></li>
+         <li><a href='/lab1/reset_counter'>/lab1/reset_counter</a></li>
+         <li><a href='/lab1/error'>/lab1/error</a></li>
+      </ul>
    </body>
 </html>
 """
