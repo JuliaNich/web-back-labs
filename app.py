@@ -95,3 +95,25 @@ def created():
   </body>
 </html>
 ''', 201
+
+@app.route("/")
+@app.route("/index")
+def index():
+    return """
+<!doctype html>
+<html>
+   <head>
+      <title>НГТУ, ФБ, Лабораторные работы</title>
+   </head>
+   <body>
+      <h1>НГТУ, ФБ, WEB-программирование, часть 2. Список лабораторных</h1>
+      <ul>
+         <li><a href='/lab1'>Первая лабораторная</a></li>
+      </ul>
+      <hr>
+      <footer>
+         Ничипоренко Юлия Николаевна, ФБИ-33, 3 курс, 2025 год
+      </footer>
+   </body>
+</html>
+"""
