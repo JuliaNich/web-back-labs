@@ -342,6 +342,24 @@ def flowers(flower_id):
     else:
         return 'цветок: ' + flower_list[flower_id]
     
-
+@app.route('/lab2/add_flower/<name>')
+def add_flower(name):
+    flower_list.append(name)
+    css_url = url_for("static", filename="lab1.css")
+    return f""" 
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="{css_url}">
+  </head>
+  <body>
+    <h1>Добавлен новый цветок</h1>
+    <p>Название нового цветка: ''' + {name} + '''</p>
+    <p>Всего цветов: {len(flower_list)}</p>
+    <p>Полный список: {flower_list}</p>
+  </body>
+</html>
+"""
     
 
