@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ничипоренко Юлия. Лабораторная работа №{{No}}</title>
+    <title>
+        {% if name %}
+            {{ name }}
+        {% else %}
+            Анонимус
+        {% endif %} 
+        Лабораторная работа №{{No}}
+    </title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
     <header>
-        WEB-Программирование, часть 2. Лабораторная работа №{{No}}
+        WEB-Программирование, часть 2. {% if lub_num %}Лабораторная работа №2{% endif %}
     </header>
     
     <main>
@@ -20,7 +27,23 @@
     </main>
 
     <footer>
-        &copy; {{name}}, {{group}}, {{number}}, {{year}}
+        &copy; 
+        {% if name %}
+            {{name}}, 
+        {% else %}
+            Анонимус
+        {% endif %}
+        {% if group %}
+            {{ group }},
+        {% else %}
+            Группа не указана
+        {% endif %}
+        {% if number %}
+            {{ number }},
+        {% else %}
+            Курс неизвестен
+        {% endif %}
+        2025
     </footer>
 </body>
 </html>

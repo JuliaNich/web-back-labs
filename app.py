@@ -368,5 +368,7 @@ def example():
     group = 'ФБИ-33'
     number = '3 курс'
     year = '2025'
-    return render_template('example.html', name=name, group=group, number=number, year=year, No=No)
+    return render_template(
+        'example.html'
+        )
     
