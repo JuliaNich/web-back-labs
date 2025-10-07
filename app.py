@@ -367,8 +367,19 @@ def example():
     name = 'Ничипоренко Юлия'
     group = 'ФБИ-33'
     number = '3 курс'
-    year = '2025'
+    fruits = [
+        {'name':'манго', 'price': 100 }, 
+        {'name':'яблоко', 'price': 55 },
+        {'name':'мандарин', 'price': 85 },
+        {'name':'киви', 'price': 90 },
+        {'name':'апельсин', 'price': 67 },
+     ]
     return render_template(
-        'example.html'
+        'example.html',
+        No=No,
+        name=name,
+        group=group,
+        number=number,
+        fruits=fruits
         )
     
