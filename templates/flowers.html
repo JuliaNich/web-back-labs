@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block lab %}Лабораторная работа №2{% endblock %}
+
+{% block main %}
+<h1>Список цветов</h1>
+
+{% if cleared %}
+<p class="notice">Список был очищен.</p>
+{% endif %}
+
+{% if flowers %}
+<ul>
+    {% for f in flowers %}
+    <li>{{ loop.index }} — {{ f }}</li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>Список пуст.</p>
+{% endif %}
+
+<a href="/lab2/clear_flowers/">Очистить список</a><br>
+<a href="/lab2/add_flower/роза">Добавить розу</a>
+{% endblock %}

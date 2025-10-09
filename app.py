@@ -340,27 +340,26 @@ def flowers(flower_id):
     if flower_id >= len(flower_list):
         abort(404)
     else:
-        return 'цветок: ' + flower_list[flower_id]
+        return render_template('flower.html', flower=flower_list[flower_id], id=flower_id)
     
 @app.route('/lab2/add_flower/<name>')
 def add_flower(name):
     flower_list.append(name)
-    css_url = url_for("static", filename="lab1.css")
-    return f""" 
-<!doctype html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <link rel="stylesheet" href="{css_url}">
-  </head>
-  <body>
-    <h1>Добавлен новый цветок</h1>
-    <p>Название нового цветка: ''' + {name} + '''</p>
-    <p>Всего цветов: {len(flower_list)}</p>
-    <p>Полный список: {flower_list}</p>
-  </body>
-</html>
-"""
+    return render_template('flower_added.html', name=name, flowers=flower_list)
+
+@app.route('/lab2/add_flower/')
+def add_flower_no_name():
+    return "Ошибка 400: вы не задали имя цветка", 400
+
+@app.route('/lab2/clear_flowers/')
+def clear_flowers():
+    flower_list.clear()
+    return render_template('flowers.html', flowers=flower_list, cleared=True)
+
+@app.route('/lab2/flowers/')
+def all_flowers():
+    return render_template('flowers.html', flowers=flower_list)
+
 @app.route('/lab2/example')
 def example():
     No = '2'
@@ -391,3 +390,4 @@ def lab2():
 def filters():
     phrase = "О <b>сколько</b> <u>нам</u> <i>открытий</i> чудных..."
     return render_template('filter.html', phrase=phrase)
+
