@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block lab %}Лабораторная работа №2{% endblock %}
+
+{% block main %}
+<h1>Калькулятор</h1>
+<p>Число A: {{ a }}, число B: {{ b }}</p>
+
+<ul>
+    <li>Сумма: {{ result.sum }}</li>
+    <li>Разность: {{ result.sub }}</li>
+    <li>Произведение: {{ result.mul }}</li>
+    <li>Деление: {{ result.div }}</li>
+    <li>Возведение в степень: {{ result.pow }}</li>
+</ul>
+
+<a href="/lab2/">Назад к списку заданий</a>
+{% endblock %}

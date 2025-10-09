@@ -391,3 +391,21 @@ def filters():
     phrase = "О <b>сколько</b> <u>нам</u> <i>открытий</i> чудных..."
     return render_template('filter.html', phrase=phrase)
 
+@app.route('/lab2/calc/')
+def calc_default_redirect():
+    return redirect('/lab2/calc/1/1')
+
+@app.route('/lab2/calc/<int:a>')
+def calc_one_number(a):
+    return redirect(f'/lab2/calc/{a}/1')
+
+@app.route('/lab2/calc/<int:a>/<int:b>')
+def calc(a, b):
+    result = {
+        'sum': a + b,
+        'sub': a - b,
+        'mul': a * b,
+        'div': a / b if b != 0 else 'Деление на ноль!',
+        'pow': a ** b
+    }
+    return render_template('calc.html', a=a, b=b, result=result)
