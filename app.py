@@ -409,3 +409,20 @@ def calc(a, b):
         'pow': a ** b
     }
     return render_template('calc.html', a=a, b=b, result=result)
+
+books = [
+    {'title': 'Мастер и Маргарита', 'author': 'М. Булгаков', 'genre': 'Роман', 'pages': 480},
+    {'title': 'Преступление и наказание', 'author': 'Ф. Достоевский', 'genre': 'Роман', 'pages': 620},
+    {'title': 'Война и мир', 'author': 'Л. Толстой', 'genre': 'Роман-эпопея', 'pages': 1225},
+    {'title': 'Три товарища', 'author': 'Э. М. Ремарк', 'genre': 'Роман', 'pages': 480},
+    {'title': '1984', 'author': 'Дж. Оруэлл', 'genre': 'Антиутопия', 'pages': 328},
+    {'title': 'Гарри Поттер и философский камень', 'author': 'Дж. Роулинг', 'genre': 'Фэнтези', 'pages': 350},
+    {'title': 'Убить пересмешника', 'author': 'Х. Ли', 'genre': 'Драма', 'pages': 400},
+    {'title': 'Анна Каренина', 'author': 'Л. Толстой', 'genre': 'Роман', 'pages': 850},
+    {'title': 'Пикник на обочине', 'author': 'Стругацкие', 'genre': 'Фантастика', 'pages': 300},
+    {'title': 'Тень ветра', 'author': 'К. Сафон', 'genre': 'Мистика', 'pages': 500}
+]
+
+@app.route('/lab2/books/')
+def show_books():
+    return render_template('books.html', books=books)
