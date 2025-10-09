@@ -268,6 +268,7 @@ def index():
     <nav>
       <ul>
         <li><a href="{url_for('lab1')}">Первая лабораторная</a></li>
+        <li><a href="{url_for('lab2')}">Лабораторная 2</a></li>
       </ul>
     </nav>
     <footer>
