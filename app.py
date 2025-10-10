@@ -334,32 +334,56 @@ def a():
 def a2():
     return 'со слэшем'
 
-flower_list = ['колокольчик', 'хризантема', 'роза', 'пион']
+flower_list = [
+    {"name": "роза", "price": 120},
+    {"name": "пион", "price": 150},
+    {"name": "тюльпан", "price": 90},
+    {"name": "ромашка", "price": 60}
+]
 
-@app.route('/lab2/flowers/<int:flower_id>')
-def flowers(flower_id):
-    if flower_id >= len(flower_list):
-        abort(404)
+@app.route('/lab2/flowers/')
+def flowers_all():
+    return render_template('flowers.html', flowers=flower_list)
+
+@app.route('/lab2/flowers/<int:flower_id>/')
+def flower_info(flower_id):
+    if 0 <= flower_id < len(flower_list):
+        return render_template('flower_info.html', flower=flower_list[flower_id], id=flower_id)
     else:
-        return render_template('flower.html', flower=flower_list[flower_id], id=flower_id)
-    
-@app.route('/lab2/add_flower/<name>')
-def add_flower(name):
-    flower_list.append(name)
-    return render_template('flower_added.html', name=name, flowers=flower_list)
+        abort(404)
 
-@app.route('/lab2/add_flower/')
-def add_flower_no_name():
-    return "Ошибка 400: вы не задали имя цветка", 400
+@app.route('/lab2/add_flower/', methods=['POST'])
+def add_flower():
+    name = request.form.get('name')
+    price = request.form.get('price')
+
+    if not name:
+        return "Вы не задали имя цветка", 400
+
+    try:
+        price = int(price)
+    except (TypeError, ValueError):
+        price = 0
+
+    flower_list.append({"name": name, "price": price})
+    return redirect(url_for('flowers_all'))
+
+@app.route('/lab2/delete_flower/<int:flower_id>/')
+def delete_flower(flower_id):
+    if 0 <= flower_id < len(flower_list):
+        del flower_list[flower_id]
+        return redirect(url_for('flowers_all'))
+    else:
+        abort(404)
 
 @app.route('/lab2/clear_flowers/')
 def clear_flowers():
     flower_list.clear()
     return render_template('flowers.html', flowers=flower_list, cleared=True)
 
-@app.route('/lab2/flowers/')
-def all_flowers():
-    return render_template('flowers.html', flowers=flower_list)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 @app.route('/lab2/example')
 def example():

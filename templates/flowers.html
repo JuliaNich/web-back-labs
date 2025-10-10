@@ -1,23 +1,49 @@
 {% extends "base.html" %}
+
 {% block lab %}Лабораторная работа №2{% endblock %}
 
 {% block main %}
 <h1>Список цветов</h1>
 
-{% if cleared %}
-<p class="notice">Список был очищен.</p>
-{% endif %}
-
 {% if flowers %}
-<ul>
-    {% for f in flowers %}
-    <li>{{ loop.index }} — {{ f }}</li>
-    {% endfor %}
-</ul>
+    <table border="1" cellpadding="8">
+        <tr>
+            <th>№</th>
+            <th>Название</th>
+            <th>Цена (₽)</th>
+            <th>Действия</th>
+        </tr>
+        {% for flower in flowers %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>
+                <a href="{{ url_for('flower_info', flower_id=loop.index0) }}">
+                    {{ flower.name }}
+                </a>
+            </td>
+            <td>{{ flower.price }}</td>
+            <td>
+                <a href="{{ url_for('delete_flower', flower_id=loop.index0) }}" style="color:red;">Удалить</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
 {% else %}
-<p>Список пуст.</p>
+    <p>Цветов пока нет</p>
 {% endif %}
 
-<a href="/lab2/clear_flowers/">Очистить список</a><br>
-<a href="/lab2/add_flower/роза">Добавить розу</a>
+<hr>
+
+<h2>Добавить новый цветок</h2>
+<form action="{{ url_for('add_flower') }}" method="post">
+    <label>Название:</label>
+    <input type="text" name="name" required>
+    <label>Цена (₽):</label>
+    <input type="number" name="price" min="0">
+    <button type="submit">Добавить</button>
+</form>
+
+<br>
+<a href="{{ url_for('clear_flowers') }}" style="color:red;">Очистить все цветы</a>
 {% endblock %}
+
