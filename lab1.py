@@ -3,11 +3,9 @@ import datetime
 
 lab1 = Blueprint('lab1', __name__)
 
-# Глобальный счётчик
 count = 0
 
 
-# --- Основная страница лабораторной №1 ---
 @lab1.route("/lab1", endpoint='lab1_index')
 def lab():
     css_url = url_for("static", filename="lab1.css")
@@ -47,7 +45,6 @@ def lab():
     return resp
 
 
-# --- 402 и 418 ошибки ---
 @lab1.route("/lab1/402")
 def route_402():
     return "402 — Payment Required (Требуется оплата)", 402
@@ -58,14 +55,12 @@ def route_418():
     return "418 — I'm a teapot (Я — чайник)", 418
 
 
-# --- Искусственная ошибка ---
 @lab1.route("/lab1/error")
 def trigger_error():
-    1 / 0  # Искусственная ошибка
+    1 / 0  
     return "не будет"
 
 
-# --- /lab1/web ---
 @lab1.route("/lab1/web")
 def web():
     css_url = url_for("static", filename="lab1.css")
@@ -89,7 +84,6 @@ def web():
     return resp
 
 
-# --- /lab1/author ---
 @lab1.route("/lab1/author")
 def author():
     name = 'Ничипоренко Юлия Николаевна'
@@ -117,7 +111,6 @@ def author():
     return make_response(html)
 
 
-# --- /lab1/image ---
 @lab1.route("/lab1/image")
 def image():
     img_url = url_for('static', filename='oak.jpeg')
@@ -140,7 +133,6 @@ def image():
     return make_response(html)
 
 
-# --- /lab1/counter ---
 @lab1.route("/lab1/counter")
 def counter():
     global count
@@ -166,7 +158,6 @@ def counter():
     return make_response(html)
 
 
-# --- /lab1/reset_counter ---
 @lab1.route("/lab1/reset_counter")
 def reset_counter():
     global count
@@ -174,13 +165,11 @@ def reset_counter():
     return redirect(url_for('lab1.counter'))
 
 
-# --- /lab1/info ---
 @lab1.route("/lab1/info")
 def info():
     return redirect(url_for('lab1.author'))
 
 
-# --- /lab1/created ---
 @lab1.route("/lab1/created")
 def created():
     css_url = url_for("static", filename="lab1.css")

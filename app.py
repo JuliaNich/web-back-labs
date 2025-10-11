@@ -3,9 +3,11 @@ import datetime
 from lab1 import lab1  
 from lab2 import lab2  
 
+
 app = Flask(__name__)
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
+
 
 log_404 = []
 
@@ -39,6 +41,7 @@ def render_404_html(requested_url, client_ip, access_time):
     html += "</ul></body></html>"
     return html
 
+
 @app.errorhandler(404)
 def handle_404(err):
     client_ip = request.remote_addr
@@ -50,21 +53,7 @@ def handle_404(err):
     resp.headers['Content-Type'] = 'text/html; charset=utf-8'
     return resp
 
-@app.errorhandler(400)
-def error_400(e):
-    return "400 — Bad Request (Неверный запрос)", 400
 
-@app.errorhandler(401)
-def error_401(e):
-    return "401 — Unauthorized (Неавторизован)", 401
-
-@app.errorhandler(403)
-def error_403(e):
-    return "403 — Forbidden (Доступ запрещён)", 403
-
-@app.errorhandler(405)
-def error_405(e):
-    return "405 — Method Not Allowed (Метод не разрешён)", 405
 
 @app.errorhandler(500)
 def error_500(e):
@@ -84,8 +73,8 @@ def error_500(e):
 </html>"""
     return html, 500
 
+
 @app.route("/")
-@app.route("/index")
 def index():
     css_url = url_for("static", filename="lab1.css")
     html = f"""<!doctype html>
