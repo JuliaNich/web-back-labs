@@ -82,3 +82,9 @@ div.box {
     width: 70%;
     box-shadow: 0 2px 10px rgba(255, 182, 193, 0.2);
 }
+.error {
+    color: red;
+    font-size: 14px;
+    margin-left: 10px;
+    font-weight: bold;
+}
