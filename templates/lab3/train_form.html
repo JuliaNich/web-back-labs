@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block lab %}Лабораторная работа 3{% endblock %}
+{% block main %}
+<h1>Железнодорожный билет</h1>
+
+<form method="post">
+    <div><label>ФИО пассажира:</label> <input type="text" name="fio"></div>
+    <div>
+        <label>Полка:</label>
+        <select name="shelf">
+            <option value="нижняя">Нижняя</option>
+            <option value="верхняя">Верхняя</option>
+            <option value="нижняя боковая">Нижняя боковая</option>
+            <option value="верхняя боковая">Верхняя боковая</option>
+        </select>
+    </div>
+    <div><label><input type="checkbox" name="linen"> С бельём</label></div>
+    <div><label><input type="checkbox" name="baggage"> С багажом</label></div>
+    <div><label>Возраст:</label> <input type="number" name="age"></div>
+    <div><label>Пункт выезда:</label> <input type="text" name="start"></div>
+    <div><label>Пункт назначения:</label> <input type="text" name="end"></div>
+    <div><label>Дата поездки:</label> <input type="date" name="date"></div>
+    <div><label><input type="checkbox" name="insurance"> Нужна страховка</label></div>
+
+    {% if errors.form %}
+        <p class="error">{{ errors.form }}</p>
+    {% elif errors.age %}
+        <p class="error">{{ errors.age }}</p>
+    {% endif %}
+
+    <div><button type="submit">Сформировать билет</button></div>
+</form>
+{% endblock %}

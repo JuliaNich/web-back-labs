@@ -92,3 +92,52 @@ def settings():
         fontstyle=fontstyle
     ))
     return resp
+
+@lab3.route('/lab3/train', methods=['GET', 'POST'])
+def train():
+    errors = {}
+    if request.method == 'POST':
+        fio = request.form.get('fio')
+        shelf = request.form.get('shelf')
+        linen = request.form.get('linen')
+        baggage = request.form.get('baggage')
+        age = request.form.get('age')
+        start = request.form.get('start')
+        end = request.form.get('end')
+        date = request.form.get('date')
+        insurance = request.form.get('insurance')
+
+        if not all([fio, shelf, age, start, end, date]):
+            errors['form'] = 'Заполните все обязательные поля!'
+        else:
+            try:
+                age = int(age)
+                if not (1 <= age <= 120):
+                    errors['age'] = 'Возраст должен быть от 1 до 120!'
+            except ValueError:
+                errors['age'] = 'Возраст должен быть числом!'
+
+        if not errors:
+            if age < 18:
+                price = 700
+                ticket_type = 'Детский билет'
+            else:
+                price = 1000
+                ticket_type = 'Взрослый билет'
+
+            if shelf in ['нижняя', 'нижняя боковая']:
+                price += 100
+            if linen == 'on':
+                price += 75
+            if baggage == 'on':
+                price += 250
+            if insurance == 'on':
+                price += 150
+
+            return render_template('lab3/train_ticket.html',
+                                   fio=fio, shelf=shelf, start=start, end=end,
+                                   date=date, age=age, price=price,
+                                   ticket_type=ticket_type)
+
+    return render_template('lab3/train_form.html', errors=errors)
+

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block lab %}Лабораторная работа 3{% endblock %}
+{% block main %}
+<h1>{{ ticket_type }}</h1>
+
+<p><strong>ФИО:</strong> {{ fio }}</p>
+<p><strong>Возраст:</strong> {{ age }}</p>
+<p><strong>Полка:</strong> {{ shelf }}</p>
+<p><strong>Маршрут:</strong> {{ start }} → {{ end }}</p>
+<p><strong>Дата поездки:</strong> {{ date }}</p>
+<p><strong>Стоимость билета:</strong> {{ price }} руб.</p>
+
+<a href="/lab3/train">Оформить новый билет</a>
+{% endblock %}
