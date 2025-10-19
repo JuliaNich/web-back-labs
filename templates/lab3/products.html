@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа №3{% endblock %}
+
+{% block main %}
+<h1>Поиск моделей iPhone по диапазону цен</h1>
+
+<form method="get">
+    <label>Мин. цена:
+        <input type="number" name="min_price" placeholder="{{ min_price_all }}" value="{{ min_price }}">
+    </label>
+    <label>Макс. цена:
+        <input type="number" name="max_price" placeholder="{{ max_price_all }}" value="{{ max_price }}">
+    </label>
+    <button type="submit">Искать</button>
+    <button type="submit" name="reset" value="1">Сброс</button>
+</form>
+
+<p>Найдено моделей: {{ count }}</p>
+
+{% if count == 0 %}
+    <p>Не найдено ни одной модели.</p>
+{% else %}
+    <table border="1" cellpadding="6">
+        <tr>
+            <th>Модель</th>
+            <th>Страна производства</th>
+            <th>Цвет</th>
+            <th>Цена (₽)</th>
+        </tr>
+        {% for p in products %}
+        <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.country }}</td>
+            <td>{{ p.color }}</td>
+            <td>{{ p.price }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+{% endblock %}

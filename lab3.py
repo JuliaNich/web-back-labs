@@ -150,3 +150,70 @@ def clear_settings():
     resp.delete_cookie('fontstyle')
     return resp
 
+products = [
+    {"name": "iPhone 15 Pro Max", "price": 76000, "country": "США", "color": "Титан"},
+    {"name": "iPhone 15 Pro", "price": 70000, "country": "США", "color": "Серый"},
+    {"name": "iPhone 15 Plus", "price": 60000, "country": "Китай", "color": "Голубой"},
+    {"name": "iPhone 15", "price": 58000, "country": "Китай", "color": "Жёлтый"},
+    {"name": "iPhone 14 Pro Max", "price": 63000, "country": "США", "color": "Золотой"},
+    {"name": "iPhone 14 Pro", "price": 57000, "country": "Китай", "color": "Фиолетовый"},
+    {"name": "iPhone 14", "price": 55000, "country": "Китай", "color": "Чёрный"},
+    {"name": "iPhone 13 Pro Max", "price": 60000, "country": "США", "color": "Серебристый"},
+    {"name": "iPhone 13 Pro", "price": 55000, "country": "Китай", "color": "Зелёный"},
+    {"name": "iPhone 13", "price": 50000, "country": "Китай", "color": "Белый"},
+    {"name": "iPhone 12 Pro Max", "price": 58000, "country": "Китай", "color": "Синий"},
+    {"name": "iPhone 12 Pro", "price": 56000, "country": "США", "color": "Графитовый"},
+    {"name": "iPhone 12", "price": 50000, "country": "Китай", "color": "Красный"},
+    {"name": "iPhone 11 Pro Max", "price": 49000, "country": "США", "color": "Серый"},
+    {"name": "iPhone 11 Pro", "price": 45000, "country": "Китай", "color": "Зелёный"},
+    {"name": "iPhone 11", "price": 35000, "country": "Китай", "color": "Белый"},
+    {"name": "iPhone XR", "price": 33000, "country": "Китай", "color": "Синий"},
+    {"name": "iPhone SE (2022)", "price": 35000, "country": "Китай", "color": "Чёрный"},
+    {"name": "iPhone XS", "price": 32000, "country": "США", "color": "Золотой"},
+    {"name": "iPhone X", "price": 30000, "country": "Китай", "color": "Серебристый"},
+]
+
+
+@lab3.route("/lab3/products")
+def products_page():
+    min_price_all = min(p["price"] for p in products)
+    max_price_all = max(p["price"] for p in products)
+
+    min_price = request.args.get("min_price", request.cookies.get("min_price", ""))
+    max_price = request.args.get("max_price", request.cookies.get("max_price", ""))
+
+    if "reset" in request.args:
+        resp = make_response(redirect("/lab3/products"))
+        resp.delete_cookie("min_price")
+        resp.delete_cookie("max_price")
+        return resp
+
+    filtered = products.copy()
+    if min_price or max_price:
+        try:
+            min_p = int(min_price) if min_price else min_price_all
+            max_p = int(max_price) if max_price else max_price_all
+
+            if min_p > max_p:
+                min_p, max_p = max_p, min_p
+
+            filtered = [p for p in products if min_p <= p["price"] <= max_p]
+        except ValueError:
+            filtered = products
+
+    resp = make_response(render_template(
+        "lab3/products.html",
+        products=filtered,
+        min_price=min_price,
+        max_price=max_price,
+        min_price_all=min_price_all,
+        max_price_all=max_price_all,
+        count=len(filtered)
+    ))
+
+    if min_price or max_price:
+        resp.set_cookie("min_price", min_price)
+        resp.set_cookie("max_price", max_price)
+
+    return resp
+
