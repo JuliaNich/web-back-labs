@@ -141,3 +141,12 @@ def train():
 
     return render_template('lab3/train_form.html', errors=errors)
 
+@lab3.route('/lab3/clear_settings')
+def clear_settings():
+    resp = make_response(redirect('/lab3/settings'))
+    resp.delete_cookie('color')
+    resp.delete_cookie('bgcolor')
+    resp.delete_cookie('fontsize')
+    resp.delete_cookie('fontstyle')
+    return resp
+
