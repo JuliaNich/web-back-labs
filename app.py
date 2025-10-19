@@ -12,8 +12,8 @@ app.register_blueprint(lab3)
 log_404 = []
 
 def render_404_html(requested_url, client_ip, access_time):
-    css_url = url_for("static", filename="lab1.css")
-    img_url = url_for("static", filename="sadcat.jpeg")
+    css_url = url_for("static", filename="lab1/lab1.css")
+    img_url = url_for("static", filename="lab1/sadcat.jpeg")
 
     html = f"""<!doctype html>
 <html>
@@ -57,7 +57,7 @@ def handle_404(err):
 
 @app.errorhandler(500)
 def error_500(e):
-    css_url = url_for("static", filename="lab1.css")
+    css_url = url_for("static", filename="lab1/lab1.css")
     html = f"""<!doctype html>
 <html>
   <head>
@@ -76,7 +76,7 @@ def error_500(e):
 
 @app.route("/")
 def index():
-    css_url = url_for("static", filename="lab1.css")
+    css_url = url_for("static", filename="lab1/lab1.css")
     html = f"""<!doctype html>
 <html>
 <head>
@@ -88,11 +88,8 @@ def index():
     <h1>НГТУ, ФБ — WEB-программирование, часть 2. Список лабораторных</h1>
     <nav>
         <ul>
-            <!-- Лабораторная 1 -->
             <li><a href="{url_for('lab1.lab1_index')}">Лабораторная №1</a></li>
-            <!-- Лабораторная 2 -->
             <li><a href="{url_for('lab2.lab22')}">Лабораторная №2</a></li>
-            <!-- Лабораторная 3 -->
             <li><a href="{url_for('lab3.lab')}">Лабораторная №3</a></li>
         </ul>
     </nav>

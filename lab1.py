@@ -8,14 +8,14 @@ count = 0
 
 @lab1.route("/lab1", endpoint='lab1_index')
 def lab():
-    css_url = url_for("static", filename="lab1.css")
+    css_url = url_for("static", filename="lab1/lab1.css")
     html = f"""<!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
     <title>Лабораторная 1</title>
     <link rel="stylesheet" href="{css_url}">
-    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='favicon.jpeg')}">
+    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='lab2/favicon.jpeg')}">
   </head>
   <body>
     <h1>Лабораторная работа №1</h1>
@@ -63,14 +63,14 @@ def trigger_error():
 
 @lab1.route("/lab1/web")
 def web():
-    css_url = url_for("static", filename="lab1.css")
+    css_url = url_for("static", filename="lab1/lab1.css")
     html = f"""<!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
     <title>Lab1 — Web</title>
     <link rel="stylesheet" href="{css_url}">
-    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='favicon.jpeg')}">
+    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='lab2/favicon.jpeg')}">
   </head>
   <body>
     <h1>Web-сервер на Flask</h1>
@@ -89,14 +89,14 @@ def author():
     name = 'Ничипоренко Юлия Николаевна'
     group = 'ФБИ-33'
     faculty = 'ФБ'
-    css_url = url_for("static", filename="lab1.css")
+    css_url = url_for("static", filename="lab1/lab1.css")
     html = f"""<!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
     <title>Автор</title>
     <link rel="stylesheet" href="{css_url}">
-    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='favicon.jpeg')}">
+    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='lab2/favicon.jpeg')}">
   </head>
   <body>
     <h1>Информация об авторе</h1>
@@ -113,15 +113,15 @@ def author():
 
 @lab1.route("/lab1/image")
 def image():
-    img_url = url_for('static', filename='oak.jpeg')
-    css_url = url_for('static', filename='lab1.css')
+    img_url = url_for('static', filename='lab1/oak.jpeg')
+    css_url = url_for('static', filename='lab1/lab1.css')
     html = f"""<!doctype html>
 <html>
   <head>
     <meta charset="utf-8">
     <title>Картинка — Дуб</title>
     <link rel="stylesheet" href="{css_url}">
-    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='favicon.jpeg')}">
+    <link rel="icon" type="image/jpeg" href="{url_for('static', filename='lab2/favicon.jpeg')}">
   </head>
   <body>
     <h1>Дуб</h1>
@@ -138,7 +138,7 @@ def counter():
     global count
     count += 1
     time_now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    css_url = url_for("static", filename="lab1.css")
+    css_url = url_for("static", filename="lab1/lab1.css")
     html = f"""<!doctype html>
 <html>
   <head>
@@ -172,7 +172,7 @@ def info():
 
 @lab1.route("/lab1/created")
 def created():
-    css_url = url_for("static", filename="lab1.css")
+    css_url = url_for("static", filename="lab1/lab1.css")
     html = f"""<!doctype html>
 <html>
   <head>
