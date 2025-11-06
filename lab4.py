@@ -111,7 +111,7 @@ def pow():
 
 tree_count = 0
 
-@lab4. route('/lab4/tree', methods = ['GET', 'POST'])
+@lab4.route('/lab4/tree', methods = ['GET', 'POST'])
 def tree():
     global tree_count
     if request.method == 'GET':
@@ -128,3 +128,17 @@ def tree():
             tree_count += 1
     
     return redirect('/lab4/tree')
+
+@lab4.route('/lab4/login', methods = ['POST', 'GET'])
+def login(): 
+    if request.method == 'GET':
+        return render_template("lab4/login.html", authorized=False)
+    
+    login = request.form.get('login')
+    password = request.form.get('password')
+
+    if login == 'alex' and password == '123':
+        return render_template("lab4/login.html", login=login, authorized=True)
+    
+    error = 'Неверные логин и/или пароль'
+    return render_template("lab4/login.html", error=error, authorized=False)
