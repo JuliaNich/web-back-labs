@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block lab %}Сложение чисел{% endblock %}
+{% block main %}
+    {% if error %} 
+        {{ error }}
+    {% else %}
+        {{ x1 }} + {{ x2 }} = {{ result }}
+    {% endif %}
+{% endblock %}

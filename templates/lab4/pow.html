@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block lab %}Возведение в степень{% endblock %}
+
+{% block main %}
+    {% if error %}
+        {{ error }}
+    {% else %}
+        {{ x1 }} ** {{ x2 }} = {{ result }}
+    {% endif %}
+{% endblock %}
