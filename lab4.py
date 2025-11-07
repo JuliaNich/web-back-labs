@@ -207,3 +207,63 @@ def fridge():
     elif -4 <= temp <= -1:
         snowflakes = '❄️'
         return render_template('/lab4/fridge.html', success=f'Установлена температура: {temp}°C', snowflakes=snowflakes)
+    
+@lab4.route('/lab4/grain_order', methods=['GET', 'POST'])
+def grain_order():
+    if request.method == 'GET':
+        return render_template('lab4/grain_order.html')
+    
+    grain_type = request.form.get('grain_type')
+    weight = request.form.get('weight')
+
+    prices = {
+        'barley': 12000,  
+        'oats': 8500,     
+        'wheat': 9000,    
+        'rye': 15000      
+    }
+    
+    grain_names = {
+        'barley': 'ячмень',
+        'oats': 'овёс', 
+        'wheat': 'пшеница',
+        'rye': 'рожь'
+    }
+
+    if not weight:
+        return render_template('lab4/grain_order.html', error='Ошибка: не указан вес')
+    
+    try:
+        weight_float = float(weight)
+    except ValueError:
+        return render_template('lab4/grain_order.html', error='Ошибка: вес должен быть числом')
+    
+    if weight_float <= 0:
+        return render_template('lab4/grain_order.html', error='Ошибка: вес должен быть положительным числом')
+    
+    if weight_float > 100:
+        return render_template('lab4/grain_order.html', error='Извините, такого объёма сейчас нет в наличии')
+
+    price_per_ton = prices.get(grain_type)
+    if not price_per_ton:
+        return render_template('lab4/grain_order.html', error='Ошибка: не выбран тип зерна')
+    
+    total = weight_float * price_per_ton
+    
+    discount_applied = False
+    discount_amount = 0
+    
+    if weight_float > 10:
+        discount_amount = total * 0.1
+        total -= discount_amount
+        discount_applied = True
+    
+    grain_name = grain_names.get(grain_type)
+    
+    return render_template('lab4/grain_order.html', 
+                         success=True,
+                         grain_name=grain_name,
+                         weight=weight_float,
+                         total=total,
+                         discount_applied=discount_applied,
+                         discount_amount=discount_amount)
