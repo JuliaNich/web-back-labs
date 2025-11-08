@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа №5{% endblock %}
+
+{% block main %}
+    <style>
+        .lab5-menu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f1eaf1;
+            padding: 15px 20px;
+            border-bottom: 2px solid #f1b4df;
+            margin: -20px -20px 20px -20px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #e42ba6;
+            font-weight: 500;
+            padding: 5px 10px;
+        }
+
+        .nav-links a:hover {
+            color: #e270a9;
+        }
+
+        .username {
+            font-weight: bold;
+            color: #f042ca;
+        }
+    </style>
+    <h1>База знаний</h1>
+    <div class="lab5-menu">
+        <div class="nav-links">
+            <a href="/lab5/list">Список статей</a>
+            <a href="/lab5/create">Создать статью</a>
+            <a href="/lab5/login">Войти</a>
+            <a href="/lab5/register">Регистрация</a>
+        </div>
+        <div class="username">{{ username }}</div>
+    </div>
+{% endblock %}
