@@ -43,6 +43,6 @@
             <a href="/lab5/login">Войти</a>
             <a href="/lab5/register">Регистрация</a>
         </div>
-        <div class="username">{{ username }}</div>
-    </div>
+        <strong>{{ login if login else 'Anonymous' }}</strong>
+        </div>
 {% endblock %}
