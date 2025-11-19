@@ -102,3 +102,26 @@ def create():
     
     db_close(conn, cur)
     return redirect('/lab5')
+
+@lab5.route('/lab5/list')
+def list_articles():
+    login = session.get('login')
+    if not login:
+        return redirect('/lab5/login')
+    
+    conn, cur = db_connect()
+
+    cur.execute("SELECT id FROM users WHERE login = %s;", (login,))
+    user = cur.fetchone()
+    
+    if not user:
+        db_close(conn, cur)
+        return "Пользователь не найден", 404
+    
+    user_id = user['id']
+
+    cur.execute("SELECT * FROM articles WHERE user_id = %s;", (user_id,))
+    articles = cur.fetchall()
+
+    db_close(conn, cur)
+    return render_template('lab5/articles.html', articles=articles)
