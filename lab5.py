@@ -111,7 +111,7 @@ def list_articles():
     
     conn, cur = db_connect()
 
-    cur.execute("SELECT id FROM users WHERE login = %s;", (login,))
+    cur.execute("SELECT id FROM users WHERE login =%s;", (login,))
     user = cur.fetchone()
     
     if not user:
@@ -120,7 +120,7 @@ def list_articles():
     
     user_id = user['id']
 
-    cur.execute("SELECT * FROM articles WHERE user_id = %s;", (user_id,))
+    cur.execute("SELECT * FROM articles WHERE user_id =%s;", (user_id,))
     articles = cur.fetchall()
 
     db_close(conn, cur)
