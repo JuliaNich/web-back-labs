@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 5{% endblock %}
+
+{% block main %}
+<h1>Публичные статьи</h1>
+
+{% if articles %}
+    {% for article in articles %}
+        <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;">
+            <h2>
+                {{ article['title'] }}
+                {% if article['is_favorite'] %}  {% endif %}
+            </h2>
+            <p><small>Автор: {{ article['real_name'] or article['login'] }}</small></p>
+            <blockquote>{{ article['article_text'] }}</blockquote>
+        </div>
+    {% endfor %}
+{% else %}
+    <p>Публичных статей пока нет.</p>
+{% endif %}
+
+<div style="margin-top: 20px;">
+    {% if session.get('login') %}
+        <a href="{{ url_for('lab5.list_articles') }}">
+            <button>Мои статьи</button>
+        </a>
+    {% else %}
+        <a href="{{ url_for('lab5.login') }}">
+            <button>Войти</button>
+        </a>
+    {% endif %}
+</div>
+{% endblock %}

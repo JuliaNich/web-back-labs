@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 5{% endblock %}
+
+{% block main %}
+<h1>Профиль пользователя</h1>
+
+{% if error %}
+    <div style="color: red; margin-bottom: 15px;">{{ error }}</div>
+{% endif %}
+
+<form method="post">
+    <div>
+        <label>
+            Логин: <input type="text" value="{{ user['login'] }}" disabled>
+        </label>
+    </div>
+    <div>
+        <label>
+            Реальное имя: <input type="text" name="real_name" value="{{ user['real_name'] or '' }}">
+        </label>
+    </div>
+    <div>
+        <label>
+            Новый пароль: <input type="password" name="password">
+        </label>
+    </div>
+    <div>
+        <label>
+            Подтверждение пароля: <input type="password" name="confirm_password">
+        </label>
+    </div>
+    <div>
+        <button type="submit">Сохранить изменения</button>
+        <a href="{{ url_for('lab5.list_articles') }}">
+            <button type="button">Назад к статьям</button>
+        </a>
+    </div>
+</form>
+{% endblock %}

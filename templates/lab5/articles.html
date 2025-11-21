@@ -8,7 +8,10 @@
 {% if articles %}
     {% for article in articles %}
         <div style="border: 1px solid #ccc; padding: 15px; margin-bottom: 15px;">
-            <h2>{{ article['title'] }}</h2>
+            <h2>{{ article['title'] }}
+            {% if article['is_favorite'] %} (Избранная) {% endif %}
+            {% if article['is_public'] %} (Публичная) {% endif %}
+            </h2>
             <blockquote>{{ article['article_text'] }}</blockquote>
             <div>
                 <a href="{{ url_for('lab5.edit_article', article_id=article['id']) }}">

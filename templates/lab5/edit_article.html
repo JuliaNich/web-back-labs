@@ -28,5 +28,17 @@
             <button type="button">Отмена</button>
         </a>
     </div>
+    <div>
+    <label>
+        <input type="checkbox" name="is_favorite" {% if article['is_favorite'] %}checked{% endif %}>
+        Избранная статья
+    </label>
+    </div>
+    <div>
+    <label>
+        <input type="checkbox" name="is_public" {% if article['is_public'] %}checked{% endif %}>
+        Публичная статья
+    </label>
+    </div>
 </form>
 {% endblock %}
