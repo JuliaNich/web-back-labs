@@ -4,8 +4,8 @@ from flask import Blueprint, render_template
 lab6 = Blueprint('lab6', __name__)
 
 offices = []
-for i in range(1,11):
-    offices.append({"number": i, "tenant": "", "price": 1000})
+for i in range(1, 11):
+    offices.append({"number": i, "tenant": "", "price": 900 + i * 100})  
 
 @lab6.route('/lab6/')
 def lab():
