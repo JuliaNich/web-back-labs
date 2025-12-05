@@ -12,47 +12,24 @@ def lab():
     return render_template('lab5/lab5.html', login=session.get('login'))
 
 def db_connect():
+    if current_app.config['DB_TYPE'] == 'postgres':
 
-    dir_path = path.dirname(path.realpath(__file__))
-    db_path = path.join(dir_path, "database.db")
-    
-    conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row  
-    cur = conn.cursor()
-
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            login TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            real_name TEXT
+        conn = psycopg2.connect(
+            host='localhost', 
+            database='julia_nichi_knowledge_base',  
+            user='julia_nichi_knowledge_base', 
+            password='251789'
         )
-    ''')
-    
-    cur.execute('''
-        CREATE TABLE IF NOT EXISTS articles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            title TEXT NOT NULL,
-            article_text TEXT NOT NULL,
-            is_favorite BOOLEAN DEFAULT 0,
-            is_public BOOLEAN DEFAULT 0,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        )
-    ''')
-
-    cur.execute("SELECT COUNT(*) FROM users")
-    if cur.fetchone()[0] == 0:
-
-        hashed_password = generate_password_hash('123')
-        cur.execute(
-            "INSERT INTO users (login, password, real_name) VALUES (?, ?, ?)",
-            ('test', hashed_password, 'Тестовый Пользователь')
-        )
-        conn.commit()
-        print("Добавлен тестовый пользователь: test/123")
-    
-    return conn, cur
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        return conn, cur
+    else:
+ 
+        dir_path = path.dirname(path.realpath(__file__))
+        db_path = path.join(dir_path, "database.db")
+        conn = sqlite3.connect(db_path)
+        conn.row_factory = sqlite3.Row  
+        cur = conn.cursor()
+        return conn, cur
 
 def db_close(conn, cur):
     conn.commit()
