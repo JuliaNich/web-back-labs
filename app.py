@@ -18,7 +18,6 @@ app.register_blueprint(lab3)
 app.register_blueprint(lab4)
 app.register_blueprint(lab5)
 
-
 log_404 = []
 
 def render_404_html(requested_url, client_ip, access_time):
