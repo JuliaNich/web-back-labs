@@ -5,7 +5,7 @@ lab6 = Blueprint('lab6', __name__)
 
 offices = []
 for i in range(1,11):
-    offices.append({"number": 1, "tenant": ""})
+    offices.append({"number": i, "tenant": "", "price": 1000})
 
 @lab6.route('/lab6/')
 def lab():
@@ -59,10 +59,7 @@ def api():
         if not login:
             return {
                 'jsonrpc': '2.0',
-                'error': {
-                    'code': 1,
-                    'message': 'Unauthorized'
-                },
+                'error': {'code': 1, 'message': 'Unauthorized'},
                 'id': id
             }
         
@@ -72,19 +69,13 @@ def api():
                 if not office['tenant']:
                     return {
                         'jsonrpc': '2.0',
-                        'error': {
-                            'code': 3,
-                            'message': 'Офис не арендован'
-                        },
+                        'error': {'code': 3, 'message': 'Офис не арендован'},
                         'id': id
                     }
                 if office['tenant'] != login:
                     return {
                         'jsonrpc': '2.0',
-                        'error': {
-                            'code': 4,
-                            'message': 'Нельзя снять чужую аренду'
-                        },
+                        'error': {'code': 4, 'message': 'Нельзя снять чужую аренду'},
                         'id': id
                     }
                 office['tenant'] = ""
@@ -96,9 +87,6 @@ def api():
     
     return {
         'jsonrpc': '2.0',
-        'error': {
-            'code': -32601,
-            'message': 'Method not found'
-        },
+        'error': {'code': -32601, 'message': 'Method not found'},
         'id': id
     }

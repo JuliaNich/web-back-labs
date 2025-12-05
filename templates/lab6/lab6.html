@@ -23,15 +23,27 @@ function getOfficeList() {
     .then(function(data) {
         const office_list = data.result;
         const ul = document.getElementById('office-list');
+
+        ul.innerHTML = '';
+        
         for(let i = 0; i < office_list.length; i++) {
             const office = office_list[i];
             const li = document.createElement('li');
-            li.innerText = `${office.number}: ${office.tenant || 'свободен'}`;
+            li.innerText = `Офис №${office.number}: ${office.tenant || 'свободен'}`;
+
+            if (!office.tenant) {
+                const bookingButton = document.createElement('button');
+                bookingButton.innerText = 'зарезервировать';
+                bookingButton.onclick = function() {booking(office.number);};
+                li.appendChild(bookingButton);
+            }
             
-            const bookingButton = document.createElement('button');
-            bookingButton.innerText = 'зарезервировать';
-            bookingButton.onclick = function() {booking(office.number);};
-            li.appendChild(bookingButton);
+            if (office.tenant) {
+                const cancellationButton = document.createElement('button');
+                cancellationButton.innerText = 'освободить';
+                cancellationButton.onclick = function() {cancellation(office.number);};
+                li.appendChild(cancellationButton);
+            }
             
             ul.appendChild(li);
         }
@@ -64,20 +76,42 @@ function booking(officeNumber) {
                 case 2:
                     alert('Офис уже арендуется');
                     break;
-                case -32601:
-                    alert('Странная ошибка');
-                    break;
             }
         } else {
-            document.getElementById('office-list').innerHTML = "";
-            getOfficeList();
+            getOfficeList(); 
         }
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    getOfficeList();
-});
+function cancellation(officeNumber) {
+    const url = '/lab6/json-rpc-api/';
+    const json = {
+        'jsonrpc': '2.0',
+        'method': 'cancellation',
+        'params': officeNumber,
+        'id': Math.round(Math.random() * 1000)
+    };
+    
+    fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(json)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            switch(data.error.code) {
+                case 1: alert('Вы не авторизованы'); break;
+                case 3: alert('Офис не арендован'); break;
+                case 4: alert('Нельзя снять чужую аренду'); break;
+            }
+        } else {
+            getOfficeList(); 
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', getOfficeList);
 </script>
 {% endblock %}
 
