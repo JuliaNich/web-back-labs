@@ -3,31 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ничипоренко Юлия. {{ self.lab() }}</title>
+    <title>Ничипоренко Юлия. {% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
     <style>
     body {
-        color: {{ request.cookies.get('color', '#000000') }};
-        background-color: {{ request.cookies.get('bgcolor', '#ffffff') }};
-        font-size: {{ request.cookies.get('fontsize', '16') }}px;
-        {% if request.cookies.get('fontstyle') == 'bold' %}
-            font-weight: bold;
-        {% elif request.cookies.get('fontstyle') == 'italic' %}
-            font-style: italic;
-        {% endif %}
-    }
+            color: {{ request.cookies.get('color', '#000000') }};
+            background-color: {{ request.cookies.get('bgcolor', '#ffffff') }};
+            font-size: {{ request.cookies.get('fontsize', '16') }}px;
+            {% if request.cookies.get('fontstyle') == 'bold' %}
+                font-weight: bold;
+            {% elif request.cookies.get('fontstyle') == 'italic' %}
+                font-style: italic;
+            {% endif %}
+        }
     </style>
-
 
     <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='lab2/favicon.jpeg') }}">
 
 </head>
 <body>
     <header>
-        WEB-Программирование, часть 2. {{ self.lab() }}
-        <ul>
-        <a href="/">Главная</a> 
-        </ul>
+        WEB-Программирование, часть 2. 
+        {% block header %}{% endblock %}
     </header>
 
     <main>
