@@ -13,22 +13,35 @@ def lab():
 
 def db_connect():
     if current_app.config['DB_TYPE'] == 'postgres':
-        conn = psycopg2.connect(
-            host='localhost',
-            database='julia_nichi_knowledge_base',
-            user='julia_nichi_knowledge_base', 
-            password='251789',
-            client_encoding='utf8'
-        )
-        cur = conn.cursor(cursor_factory=RealDictCursor)
-        return conn, cur
-    else:
-        dir_path = path.dirname(path.realpath(__file__))
-        db_path = path.join(dir_path, "database.db")
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row  
-        cur = conn.cursor()
-        return conn, cur
+        try:
+
+            import os
+
+            db_url = os.environ.get('DATABASE_URL')
+            if db_url:
+
+                conn = psycopg2.connect(db_url, sslmode='require')
+            else:
+
+                conn = psycopg2.connect(
+                    host='localhost' if os.environ.get('PYTHONANYWHERE') is None else '127.0.0.1',
+                    database='julia_nichi_knowledge_base',
+                    user='julia_nichi_knowledge_base',
+                    password='251789'
+                )
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            return conn, cur
+        except psycopg2.OperationalError:
+
+            print("PostgreSQL недоступен, переключаюсь на SQLite")
+            current_app.config['DB_TYPE'] = 'sqlite'
+
+    dir_path = path.dirname(path.realpath(__file__))
+    db_path = path.join(dir_path, "database.db")
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row  
+    cur = conn.cursor()
+    return conn, cur
 
 def db_close(conn, cur):
     conn.commit()
