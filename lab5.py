@@ -12,35 +12,46 @@ def lab():
     return render_template('lab5/lab5.html', login=session.get('login'))
 
 def db_connect():
-    if current_app.config['DB_TYPE'] == 'postgres':
-        try:
-
-            import os
-
-            db_url = os.environ.get('DATABASE_URL')
-            if db_url:
-
-                conn = psycopg2.connect(db_url, sslmode='require')
-            else:
-
-                conn = psycopg2.connect(
-                    host='localhost' if os.environ.get('PYTHONANYWHERE') is None else '127.0.0.1',
-                    database='julia_nichi_knowledge_base',
-                    user='julia_nichi_knowledge_base',
-                    password='251789'
-                )
-            cur = conn.cursor(cursor_factory=RealDictCursor)
-            return conn, cur
-        except psycopg2.OperationalError:
-
-            print("PostgreSQL недоступен, переключаюсь на SQLite")
-            current_app.config['DB_TYPE'] = 'sqlite'
 
     dir_path = path.dirname(path.realpath(__file__))
     db_path = path.join(dir_path, "database.db")
+    
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row  
     cur = conn.cursor()
+
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            login TEXT UNIQUE NOT NULL,
+            password TEXT NOT NULL,
+            real_name TEXT
+        )
+    ''')
+    
+    cur.execute('''
+        CREATE TABLE IF NOT EXISTS articles (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            article_text TEXT NOT NULL,
+            is_favorite BOOLEAN DEFAULT 0,
+            is_public BOOLEAN DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+    ''')
+
+    cur.execute("SELECT COUNT(*) FROM users")
+    if cur.fetchone()[0] == 0:
+
+        hashed_password = generate_password_hash('123')
+        cur.execute(
+            "INSERT INTO users (login, password, real_name) VALUES (?, ?, ?)",
+            ('test', hashed_password, 'Тестовый Пользователь')
+        )
+        conn.commit()
+        print("Добавлен тестовый пользователь: test/123")
+    
     return conn, cur
 
 def db_close(conn, cur):
