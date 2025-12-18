@@ -29,13 +29,13 @@ function fillFilmList() {
                 let editButton = document.createElement('button');
                 editButton.innerText = 'Редактировать';
                 editButton.onclick = function() {
-                    editFilm(i);
+                    editFilm(films[i].id);
                 };
 
                 let delButton = document.createElement('button');
                 delButton.innerText = 'Удалить';
                 delButton.onclick = function() {
-                    deleteFilm(i, films[i].title_ru);
+                    deleteFilm(films[i].id, films[i].title_ru);
                 };
 
                 tdActions.append(editButton);

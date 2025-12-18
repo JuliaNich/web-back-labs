@@ -1,138 +1,166 @@
-from flask import Blueprint, render_template, request, session, jsonify
+from flask import Blueprint, render_template, request, jsonify
 from datetime import datetime
+import sqlite3
+import os
 
 lab7 = Blueprint('lab7', __name__)
+
+DB_PATH = os.path.join(os.path.dirname(__file__), 'film.db')
+
+def get_db_connection():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def get_all_films():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, title, title_ru, year, description FROM films ORDER BY id")
+    films = cursor.fetchall()
+    conn.close()
+    return [dict(film) for film in films]
+
+def get_film_by_id(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, title, title_ru, year, description FROM films WHERE id = ?", (id,))
+    film = cursor.fetchone()
+    conn.close()
+    return dict(film) if film else None
+
+def save_film_to_db(film_data):  
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "INSERT INTO films (title, title_ru, year, description) VALUES (?, ?, ?, ?)",
+        (film_data['title'], film_data['title_ru'], film_data['year'], film_data['description'])
+    )
+    new_id = cursor.lastrowid
+    conn.commit()
+    conn.close()
+    return new_id
+
+def update_film_in_db(id, film_data):  
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE films SET title = ?, title_ru = ?, year = ?, description = ? WHERE id = ?",
+        (film_data['title'], film_data['title_ru'], film_data['year'], film_data['description'], id)
+    )
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
+
+def delete_film_from_db(id):  
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM films WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+    return cursor.rowcount > 0
+
+def validate_film_data(data):
+    current_year = datetime.now().year
+    errors = {}
+    
+    if 'title_ru' not in data or not data['title_ru'].strip():
+        errors['title_ru'] = "Заполните русское название"
+    
+    if 'year' not in data:
+        errors['year'] = "Укажите год выпуска"
+    else:
+        try:
+            year = int(data['year'])
+            if year < 1895 or year > current_year:
+                errors['year'] = f"Год должен быть от 1895 до {current_year}"
+        except ValueError:
+            errors['year'] = "Год должен быть числом"
+    
+    if 'description' not in data or not data['description'].strip():
+        errors['description'] = "Заполните описание"
+    elif len(data['description']) > 2000:
+        errors['description'] = "Описание не должно превышать 2000 символов"
+    
+    return errors
 
 @lab7.route('/lab7/')
 def lab():
     return render_template('lab7/index.html')
 
-films = [
-    {
-        "id": 0,
-        "title": "Interstellar",
-        "title_ru": "Интерстеллар",
-        "year": 2014,
-        "description": "Когда засуха, пыльные бури и вымирание растений приводят человечество к продовольственному кризису, коллектив исследователей и учёных отправляется сквозь червоточину (которая предположительно соединяет области пространства-времени через большое расстояние) в путешествие, чтобы превзойти прежние ограничения для космических путешествий человека и найти планету с подходящими для человечества условиями."
-    },
-    {
-        "id": 1,
-        "title": "The Shawshank Redemption",
-        "title_ru": "Побег из Шоушенка",
-        "year": 1994,
-        "description": "Бухгалтер Энди Дюфрейн обвинен в убийстве собственной жены и её любовника. Оказавшись в тюрьме под названием Шоушенк, он сталкивается с жестокостью и беззаконием, царящими по обе стороны решётки. Каждый, кто попадает в эти стены, становится их рабом до конца жизни. Но Энди, обладающий живым умом и доброй душой, находит подход как к заключённым, так и к охранникам, добиваясь их особого к себе расположения."
-    },
-    {
-        "id": 2,
-        "title": "The Green Mile",
-        "title_ru": "Зеленая миля",
-        "year": 1999,
-        "description": "Пол Эджкомб — начальник блока смертников в тюрьме «Холодная гора», каждый из узников которого однажды проходит «зеленую милю» по пути к месту казни. Пол повидал много заключённых и надзирателей за время работы. Однако гигант Джон Коффи, обвинённый в страшном преступлении, стал одним из самых необычных обитателей блока."
-    },
-    {
-        "id": 3,
-        "title": "Inception",
-        "title_ru": "Начало",
-        "year": 2010,
-        "description": "Кобб — талантливый вор, лучший из лучших в опасном искусстве извлечения: он крадет ценные секреты из глубин подсознания во время сна, когда человеческий разум наиболее уязвим. Редкие способности Кобба сделали его ценным игроком в привычном к предательству мире промышленного шпионажа, но они же превратили его в извечного беглеца и лишили всего, что он когда-либо любил."
-    },
-    {
-        "id": 4,
-        "title": "The Matrix",
-        "title_ru": "Матрица",
-        "year": 1999,
-        "description": "Жизнь Томаса Андерсона разделена на две части: днём он — самый обычный офисный работник, получающий нагоняи от начальства, а ночью превращается в хакера по имени Нео, и нет места в сети, куда он бы не смог проникнуть. Но однажды всё меняется. Томас узнаёт ужасающую правду о реальности."
-    }
-]
-
 @lab7.route('/lab7/rest-api/films/', methods=['GET'])
 def get_films():
+    films = get_all_films()
     return jsonify(films)
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['GET'])
 def get_film(id):
-    if id < 0 or id >= len(films):
-        return {"error": "Фильм не найден"}, 404
-    
-    return jsonify(films[id]) 
+    film = get_film_by_id(id)
+    if not film:
+        return jsonify({"error": "Фильм не найден"}), 404
+    return jsonify(film)
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
 def del_film(id):
-    if id < 0 or id >= len(films):
-        return {"error": "Фильм не найден"}, 404
+    film = get_film_by_id(id)
+    if not film:
+        return jsonify({"error": "Фильм не найден"}), 404
     
-    del films[id]
-    return '', 204    
+    if delete_film_from_db(id):
+        return '', 204
+    return jsonify({"error": "Ошибка при удалении"}), 500
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['PUT'])
 def put_film(id):
-    if id < 0 or id >= len(films):
-        return {"error": "Фильм не найден"}, 404
+    film = get_film_by_id(id)
+    if not film:
+        return jsonify({"error": "Фильм не найден"}), 404
     
-    film = request.get_json()
-    current_year = datetime.now().year
-
-    if 'title_ru' not in film or not film.get('title_ru', '').strip():
-        return {"title_ru": "Заполните русское название"}, 400
-
-    if 'title' not in film or not film.get('title', '').strip():
-        film['title'] = film['title_ru']
+    data = request.get_json()
     
-    if 'year' not in film:
-        return {"year": "Укажите год выпуска"}, 400
+    errors = validate_film_data(data)
+    if errors:
+        return jsonify(errors), 400
     
-    try:
-        year = int(film['year'])
-        if year < 1895 or year > current_year:
-            return {"year": f"Год должен быть от 1895 до {current_year}"}, 400
-    except (ValueError, TypeError):
-        return {"year": "Год должен быть числом"}, 400
+    title = data.get('title', '').strip()
+    if not title:
+        title = data['title_ru'].strip()
     
-    if 'description' not in film or not film.get('description', '').strip():
-        return {"description": "Заполните описание"}, 400
+    film_data = {
+        'title': title,
+        'title_ru': data['title_ru'].strip(),
+        'year': int(data['year']),
+        'description': data['description'].strip()
+    }
     
-    film['id'] = len(films)
-
-    description = film['description'].strip()
-    if len(description) > 2000:
-        return {"description": "Описание не должно превышать 2000 символов"}, 400
-    
-    film['id'] = id
-    films[id] = film
-    return film
+    if update_film_in_db(id, film_data):
+        updated_film = get_film_by_id(id)
+        return jsonify(updated_film)
+    return jsonify({"error": "Ошибка при обновлении"}), 500
 
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
-
-    new_film = request.get_json()
-    current_year = datetime.now().year
-
-    if 'title_ru' not in new_film or not new_film.get('title_ru', '').strip():
-        return {"title_ru": "Заполните русское название"}, 400
-
-    if 'title' not in new_film or not new_film.get('title', '').strip():
-        new_film['title'] = new_film['title_ru']
+    data = request.get_json()
     
-    if 'year' not in new_film:
-        return {"year": "Укажите год выпуска"}, 400
+    errors = validate_film_data(data)
+    if errors:
+        return jsonify(errors), 400
     
-    try:
-        year = int(new_film['year'])
-        if year < 1895 or year > current_year:
-            return {"year": f"Год должен быть от 1895 до {current_year}"}, 400
-    except (ValueError, TypeError):
-        return {"year": "Год должен быть числом"}, 400
+    title = data.get('title', '').strip()
+    if not title:
+        title = data['title_ru'].strip()
     
-    if 'description' not in new_film or not new_film.get('description', '').strip():
-        return {"description": "Заполните описание"}, 400
+    film_data = {
+        'title': title,
+        'title_ru': data['title_ru'].strip(),
+        'year': int(data['year']),
+        'description': data['description'].strip()
+    }
     
-    new_film['id'] = len(films)
-
-    description = new_film['description'].strip()
-    if len(description) > 2000:
-        return {"description": "Описание не должно превышать 2000 символов"}, 400
-
-    films.append(new_film)
-
-    new_id = len(films) - 1
-    return {"id": new_id, "message": "Фильм добавлен", "total_films": len(films)}, 201
+    new_id = save_film_to_db(film_data)  
+    if new_id:
+        return jsonify({
+            "id": new_id,
+            "message": "Фильм добавлен"
+        }), 201
+    
+    return jsonify({"error": "Ошибка при добавлении"}), 500
