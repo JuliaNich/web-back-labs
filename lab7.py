@@ -79,6 +79,9 @@ def add_film():
 
     new_film = request.get_json()
 
+    if new_film.get('description') == '':
+        return {"description": "Заполните описание"}, 400
+
     films.append(new_film)
 
     new_id = len(films) - 1

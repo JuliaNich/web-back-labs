@@ -58,6 +58,7 @@ function deleteFilm(id, title) {
 
 function showModal() {
     document.querySelector('div.modal').style.display = 'block';
+    document.getElementById('description-error').innerText = ''
 }
 
 function hideModal() {
@@ -89,17 +90,19 @@ function sendFilm() {
     const url = `/lab7/rest-api/films/${id}`;
     const method = id === '' ? 'POST' : 'PUT';
 
+    document.getElementById('description-error').innerText = '';
+
     fetch(url, {
         method: method,
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(film)
     })
-    .then(function() {
-        if(resp.ok) {
+    .then(function(response) {
+        if(response.ok) {
             fillFilmList();
             hideModal();
         }
-        return resp.json();
+        return response.json();
     })
     .then(function(errors) {
     if (errors.description) {
