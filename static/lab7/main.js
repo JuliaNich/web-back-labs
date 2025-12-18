@@ -15,7 +15,7 @@ function fillFilmList() {
                 let tdYear = document.createElement('td');
                 let tdActions = document.createElement('td');
                 
-                tdTitle.innerText = films[i].title == films[i].title_ru ? '' : films[i].title;
+                tdTitle.innerText = films[i].title;
                 tdTitleRus.innerText = films[i].title_ru;
                 tdYear.innerText = films[i].year;
 
@@ -81,7 +81,7 @@ function addFilm() {
 function sendFilm() {
     const id = document.getElementById('filmId').value;
     const film = {
-        title: document.getElementById('title').value,
+        title: document.getElementById('title').value || '',
         title_ru: document.getElementById('title_ru').value,
         year: document.getElementById('year').value,
         description: document.getElementById('description').value

@@ -69,8 +69,13 @@ def put_film(id):
         return {"error": "Фильм не найден"}, 404
     
     film = request.get_json()
+
     if film['description'] == '':
         return {"description": "Заполните описание"}, 400
+    
+    if 'title' not in film or not film['title'] or film['title'].strip() == '':
+        film['title'] = film['title_ru']
+
     films[id] = film
     return films[id]        
 
@@ -81,6 +86,9 @@ def add_film():
 
     if new_film.get('description') == '':
         return {"description": "Заполните описание"}, 400
+    
+    if 'title' not in new_film or not new_film['title'] or new_film['title'].strip() == '':
+        new_film['title'] = new_film['title_ru']
 
     films.append(new_film)
 
