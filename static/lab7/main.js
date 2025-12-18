@@ -65,7 +65,10 @@ function deleteFilm(id, title) {
 
 function showModal() {
     document.querySelector('div.modal').style.display = 'block';
-    document.getElementById('description-error').innerText = ''
+    document.getElementById('description-error').innerText = '';
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.innerText = '';
+    });
 }
 
 function hideModal() {
@@ -94,10 +97,12 @@ function sendFilm() {
         description: document.getElementById('description').value
     }
 
-    const url = `/lab7/rest-api/films/${id}`;
+    const url = id === '' ? '/lab7/rest-api/films/' : `/lab7/rest-api/films/${id}`;
     const method = id === '' ? 'POST' : 'PUT';
 
-    document.getElementById('description-error').innerText = '';
+    document.querySelectorAll('.error-message').forEach(el => {
+        el.innerText = '';
+    });
 
     fetch(url, {
         method: method,
@@ -105,16 +110,36 @@ function sendFilm() {
         body: JSON.stringify(film)
     })
     .then(function(response) {
-        if(response.ok) {
-            fillFilmList();
-            hideModal();
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.json().then(function(errors) {
+                if (errors.title_ru) {
+                    document.getElementById('title_ru-error').innerText = errors.title_ru;
+                }
+                if (errors.title) {
+                    document.getElementById('title-error').innerText = errors.title;
+                }
+                if (errors.year) {
+                    document.getElementById('year-error').innerText = errors.year;
+                }
+                if (errors.description) {
+                    document.getElementById('description-error').innerText = errors.description;
+                }
+                if (errors.error) {
+                    alert(errors.error); 
+                }
+                throw new Error('Ошибка валидации');
+            });
         }
-        return response.json();
     })
-    .then(function(errors) {
-    if (errors.description) {
-        document.getElementById('description-error').innerText = errors.description;
-    }
+    .then(function(data) {
+
+        fillFilmList();
+        hideModal();
+    })
+    .catch(function(error) {
+        console.error('Ошибка:', error);
     });
 }
 

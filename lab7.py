@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, session, jsonify
+from datetime import datetime
 
 lab7 = Blueprint('lab7', __name__)
 
@@ -53,7 +54,7 @@ def get_film(id):
     if id < 0 or id >= len(films):
         return {"error": "Фильм не найден"}, 404
     
-    return films[id]
+    return jsonify(films[id]) 
 
 @lab7.route('/lab7/rest-api/films/<int:id>', methods=['DELETE'])
 def del_film(id):
@@ -69,26 +70,67 @@ def put_film(id):
         return {"error": "Фильм не найден"}, 404
     
     film = request.get_json()
+    current_year = datetime.now().year
 
-    if film['description'] == '':
+    if 'title_ru' not in film or not film.get('title_ru', '').strip():
+        return {"title_ru": "Заполните русское название"}, 400
+
+    if 'title' not in film or not film.get('title', '').strip():
+        film['title'] = film['title_ru']
+    
+    if 'year' not in film:
+        return {"year": "Укажите год выпуска"}, 400
+    
+    try:
+        year = int(film['year'])
+        if year < 1895 or year > current_year:
+            return {"year": f"Год должен быть от 1895 до {current_year}"}, 400
+    except (ValueError, TypeError):
+        return {"year": "Год должен быть числом"}, 400
+    
+    if 'description' not in film or not film.get('description', '').strip():
         return {"description": "Заполните описание"}, 400
     
-    if 'title' not in film or not film['title'] or film['title'].strip() == '':
-        film['title'] = film['title_ru']
+    film['id'] = len(films)
 
+    description = film['description'].strip()
+    if len(description) > 2000:
+        return {"description": "Описание не должно превышать 2000 символов"}, 400
+    
+    film['id'] = id
     films[id] = film
-    return films[id]        
+    return film
 
 @lab7.route('/lab7/rest-api/films/', methods=['POST'])
 def add_film():
 
     new_film = request.get_json()
+    current_year = datetime.now().year
 
-    if new_film.get('description') == '':
+    if 'title_ru' not in new_film or not new_film.get('title_ru', '').strip():
+        return {"title_ru": "Заполните русское название"}, 400
+
+    if 'title' not in new_film or not new_film.get('title', '').strip():
+        new_film['title'] = new_film['title_ru']
+    
+    if 'year' not in new_film:
+        return {"year": "Укажите год выпуска"}, 400
+    
+    try:
+        year = int(new_film['year'])
+        if year < 1895 or year > current_year:
+            return {"year": f"Год должен быть от 1895 до {current_year}"}, 400
+    except (ValueError, TypeError):
+        return {"year": "Год должен быть числом"}, 400
+    
+    if 'description' not in new_film or not new_film.get('description', '').strip():
         return {"description": "Заполните описание"}, 400
     
-    if 'title' not in new_film or not new_film['title'] or new_film['title'].strip() == '':
-        new_film['title'] = new_film['title_ru']
+    new_film['id'] = len(films)
+
+    description = new_film['description'].strip()
+    if len(description) > 2000:
+        return {"description": "Описание не должно превышать 2000 символов"}, 400
 
     films.append(new_film)
 
