@@ -69,6 +69,8 @@ def put_film(id):
         return {"error": "Фильм не найден"}, 404
     
     film = request.get_json()
+    if film['description'] == '':
+        return {"description": "Заполните описание"}, 400
     films[id] = film
     return films[id]        
 
