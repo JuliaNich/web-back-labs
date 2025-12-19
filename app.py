@@ -1,6 +1,12 @@
 import os
-from flask import Flask, url_for, request, redirect, make_response, abort
+from flask import Flask, url_for, request, redirect, make_response, abort, send_from_directory
 import datetime
+
+app = Flask(__name__)
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "секретно-секретный секрет")
+app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'sqlite')
+
 from lab1 import lab1  
 from lab2 import lab2  
 from lab3 import lab3
@@ -8,11 +14,7 @@ from lab4 import lab4
 from lab5 import lab5
 from lab6 import lab6
 from lab7 import lab7
-
-app = Flask(__name__)
-
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', "секретно-секретный секрет")
-app.config['DB_TYPE'] = os.getenv('DB_TYPE', 'sqlite')
+from rgz import rgz
 
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
@@ -21,6 +23,7 @@ app.register_blueprint(lab4)
 app.register_blueprint(lab5)
 app.register_blueprint(lab6)
 app.register_blueprint(lab7)
+app.register_blueprint(rgz, url_prefix='/rgz')
 
 log_404 = []
 
@@ -90,6 +93,28 @@ def error_500(e):
 @app.route("/")
 def index():
     css_url = url_for("static", filename="lab1/lab1.css")
+
+    links = []
+
+    blueprints_to_check = [
+        ('lab1', 'Лабораторная №1', 'lab1.lab1_index'),
+        ('lab2', 'Лабораторная №2', 'lab2.lab22'),
+        ('lab3', 'Лабораторная №3', 'lab3.lab'),
+        ('lab4', 'Лабораторная №4', 'lab4.lab'),
+        ('lab5', 'Лабораторная №5', 'lab5.lab'),
+        ('lab6', 'Лабораторная №6', 'lab6.lab'),
+        ('lab7', 'Лабораторная №7', 'lab7.lab'),
+    ]
+    
+    for bp_name, bp_text, endpoint in blueprints_to_check:
+        if bp_name in app.blueprints:
+            links.append(f'<li><a href="{url_for(endpoint)}">{bp_text}</a></li>')
+
+    if 'rgz' in app.blueprints:
+        links.append(f'<li><a href="{url_for("rgz.index")}">РГЗ (Сайт знакомств)</a></li>')
+    
+    links_html = '\n'.join(links) if links else '<li>Нет доступных лабораторных работ</li>'
+    
     html = f"""<!doctype html>
 <html>
 <head>
@@ -101,13 +126,7 @@ def index():
     <h1>НГТУ, ФБ — WEB-программирование, часть 2. Список лабораторных</h1>
     <nav>
         <ul>
-            <li><a href="{url_for('lab1.lab1_index')}">Лабораторная №1</a></li>
-            <li><a href="{url_for('lab2.lab22')}">Лабораторная №2</a></li>
-            <li><a href="{url_for('lab3.lab')}">Лабораторная №3</a></li>
-            <li><a href="{url_for('lab4.lab')}">Лабораторная №4</a></li>
-            <li><a href="{url_for('lab5.lab')}">Лабораторная №5</a></li>
-            <li><a href="{url_for('lab6.lab')}">Лабораторная №6</a></li>
-            <li><a href="{url_for('lab7.lab')}">Лабораторная №7</a></li>
+            {links_html}
         </ul>
     </nav>
     <footer>
@@ -115,4 +134,6 @@ def index():
     </footer>
 </body>
 </html>"""
+    
     return html
+

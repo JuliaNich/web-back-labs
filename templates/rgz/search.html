@@ -1,0 +1,142 @@
+{% extends "rgz/layout.html" %}
+
+{% block title %}Поиск{% endblock %}
+
+{% block content %}
+<div class="rgz-search-container">
+    <h2>Поиск партнера</h2>
+    
+    <div class="rgz-search-filters">
+        <form id="searchForm" class="rgz-form">
+            <div class="rgz-form-row">
+                <div class="rgz-form-group">
+                    <label for="name">Имя:</label>
+                    <input type="text" id="name" name="name" placeholder="Введите имя">
+                </div>
+                
+                <div class="rgz-form-group">
+                    <label for="age_from">Возраст от:</label>
+                    <input type="number" id="age_from" name="age_from" min="18" max="100" placeholder="18">
+                </div>
+                
+                <div class="rgz-form-group">
+                    <label for="age_to">Возраст до:</label>
+                    <input type="number" id="age_to" name="age_to" min="18" max="100" placeholder="100">
+                </div>
+            </div>
+            
+            <div class="rgz-form-actions">
+                <button type="submit" class="rgz-btn rgz-btn-primary">Найти</button>
+            </div>
+        </form>
+    </div>
+    
+    <div class="rgz-search-results">
+        <h3>Результаты поиска</h3>
+        <div id="searchResults">
+            <p>Введите критерии поиска и нажмите "Найти"</p>
+        </div>
+        <div id="loadMoreContainer" style="display: none;">
+            <button onclick="loadMoreUsers()" class="rgz-btn rgz-btn-secondary" id="loadMoreBtn">Показать еще</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentSessionId = null;
+
+    document.getElementById('searchForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            name: formData.get('name') || '',
+            age_from: formData.get('age_from') ? parseInt(formData.get('age_from')) : null,
+            age_to: formData.get('age_to') ? parseInt(formData.get('age_to')) : null
+        };
+        
+        const result = await rgzJsonRpc("{{ url_for('rgz.search_users') }}", "search", data);
+        
+        if (result.result) {
+            currentSessionId = result.result.session_id;
+            displayUsers(result.result.users);
+            
+            if (result.result.has_more) {
+                document.getElementById('loadMoreContainer').style.display = 'block';
+                document.getElementById('loadMoreBtn').textContent = 'Показать еще (осталось)';
+            } else {
+                document.getElementById('loadMoreContainer').style.display = 'none';
+            }
+        } else {
+            showMessage('Ошибка поиска: ' + result.error, 'error');
+        }
+    });
+
+    function displayUsers(users) {
+        const container = document.getElementById('searchResults');
+        
+        if (users.length === 0) {
+            container.innerHTML = '<p>По вашему запросу ничего не найдено</p>';
+            return;
+        }
+        
+        let html = '<div class="rgz-users-grid">';
+        
+        users.forEach(user => {
+            html += `
+                <div class="rgz-user-card">
+                    <img src="${user.photo_url}" alt="${user.name}" class="rgz-user-photo">
+                    <div class="rgz-user-info">
+                        <h4>${user.name}</h4>
+                        <p><strong>Возраст:</strong> ${user.age} лет</p>
+                        <p><strong>Пол:</strong> ${user.gender === 'male' ? 'Мужской' : 'Женский'}</p>
+                        ${user.about ? `<p><strong>О себе:</strong> ${user.about.substring(0, 100)}${user.about.length > 100 ? '...' : ''}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        container.innerHTML = html;
+    }
+
+    async function loadMoreUsers() {
+        if (!currentSessionId) return;
+        
+        const result = await rgzJsonRpc("{{ url_for('rgz.search_users') }}", "search", {
+            session_id: currentSessionId,
+            get_next: true
+        });
+        
+        if (result.result) {
+            const container = document.getElementById('searchResults');
+            const currentHTML = container.innerHTML;
+
+            let newHTML = currentHTML.replace('</div>', '');
+            result.result.users.forEach(user => {
+                newHTML += `
+                    <div class="rgz-user-card">
+                        <img src="${user.photo_url}" alt="${user.name}" class="rgz-user-photo">
+                        <div class="rgz-user-info">
+                            <h4>${user.name}</h4>
+                            <p><strong>Возраст:</strong> ${user.age} лет</p>
+                            <p><strong>Пол:</strong> ${user.gender === 'male' ? 'Мужской' : 'Женский'}</p>
+                            ${user.about ? `<p><strong>О себе:</strong> ${user.about.substring(0, 100)}${user.about.length > 100 ? '...' : ''}</p>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            newHTML += '</div>';
+            container.innerHTML = newHTML;
+            
+            if (!result.result.has_more) {
+                document.getElementById('loadMoreContainer').style.display = 'none';
+                showMessage('Все результаты загружены', 'info');
+            }
+        } else {
+            showMessage('Ошибка загрузки', 'error');
+        }
+    }
+</script>
+{% endblock %}

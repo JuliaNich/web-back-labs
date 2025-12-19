@@ -1,0 +1,139 @@
+{% extends "rgz/layout.html" %}
+
+{% block title %}Админка{% endblock %}
+
+{% block content %}
+<div class="rgz-admin-container">
+    <h2>Панель администратора</h2>
+    
+    <div class="rgz-admin-actions">
+        <button onclick="loadUsers()" class="rgz-btn rgz-btn-primary">Обновить список</button>
+        <button onclick="loadStats()" class="rgz-btn rgz-btn-secondary">Статистика</button>
+    </div>
+    
+    <div class="rgz-admin-stats" id="adminStats" style="display: none;">
+    </div>
+    
+    <div class="rgz-admin-users">
+        <h3>Пользователи сайта</h3>
+        <div id="usersList">
+            <p>Нажмите "Обновить список" для загрузки пользователей</p>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    async function loadUsers() {
+        const result = await rgzJsonRpc("{{ url_for('rgz.admin_get_users') }}", "get_users", {});
+        if (result.result) {
+            displayUsers(result.result);
+        } else {
+            showMessage('Ошибка загрузки пользователей', 'error');
+        }
+    }
+
+    function displayUsers(users) {
+        const container = document.getElementById('usersList');
+        
+        if (users.length === 0) {
+            container.innerHTML = '<p>Нет пользователей</p>';
+            return;
+        }
+        
+        let html = `
+            <div class="rgz-admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Логин</th>
+                            <th>Имя</th>
+                            <th>Возраст</th>
+                            <th>Пол</th>
+                            <th>Статус</th>
+                            <th>Дата регистрации</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+        
+        users.forEach(user => {
+            const genderText = user.gender === 'male' ? 'М' : 'Ж';
+            const hiddenStatus = user.is_hidden ? 'Скрыт' : 'Виден';
+            const statusClass = user.is_hidden ? 'rgz-badge-warning' : 'rgz-badge-success';
+            
+            html += `
+                <tr>
+                    <td>${user.id}</td>
+                    <td>${user.login}</td>
+                    <td>${user.name}</td>
+                    <td>${user.age}</td>
+                    <td>${genderText}</td>
+                    <td><span class="rgz-badge ${statusClass}">${hiddenStatus}</span></td>
+                    <td>${new Date(user.created_at).toLocaleDateString('ru-RU')}</td>
+                    <td>
+                        <button onclick="deleteUser(${user.id})" class="rgz-btn rgz-btn-danger rgz-btn-small">Удалить</button>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                    </tbody>
+                </table>
+            </div>
+            <p>Всего пользователей: ${users.length}</p>
+        `;
+        
+        container.innerHTML = html;
+    }
+
+    async function deleteUser(userId) {
+        if (!confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+            return;
+        }
+        
+        const result = await rgzJsonRpc("{{ url_for('rgz.admin_delete_user') }}", "delete_user", { user_id: userId });
+        if (result.result) {
+            showMessage('Пользователь удален', 'success');
+            loadUsers(); 
+        } else {
+            showMessage('Ошибка удаления пользователя', 'error');
+        }
+    }
+
+    async function loadStats() {
+        const result = await rgzJsonRpc("{{ url_for('rgz.get_stats') }}", "get_stats", {});
+        if (result.result) {
+            const stats = result.result;
+            const statsContainer = document.getElementById('adminStats');
+            
+            statsContainer.innerHTML = `
+                <h3>Статистика сайта</h3>
+                <div class="rgz-stats-grid">
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.total_users}</span>
+                        <span class="rgz-stat-label">Всего пользователей</span>
+                    </div>
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.male_users}</span>
+                        <span class="rgz-stat-label">Мужчин</span>
+                    </div>
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.female_users}</span>
+                        <span class="rgz-stat-label">Женщин</span>
+                    </div>
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.avg_age}</span>
+                        <span class="rgz-stat-label">Средний возраст</span>
+                    </div>
+                </div>
+            `;
+            
+            statsContainer.style.display = 'block';
+        }
+    }
+</script>
+{% endblock %}

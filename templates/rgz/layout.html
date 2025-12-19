@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сайт знакомств РГЗ - {% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='rgz/css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon_rgz.jpeg') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon_rgz.jpeg') }}" type="image/x-icon">
+</head>
+<body>
+    <div class="rgz-container">
+        <header class="rgz-header">
+            <div class="rgz-header-left">
+                <h1>Сайт знакомств</h1>
+            </div>
+            <div class="rgz-header-right">
+                <div class="rgz-student-info">
+                    <span class="rgz-student-name">{{ student_name }}</span>
+                    <span class="rgz-student-group">{{ student_group }}</span>
+                </div>
+                {% if rgz_user %}
+                <div class="rgz-user-info">
+                    <span>Привет, {{ rgz_user.name }}!</span>
+                    {% if rgz_user.is_admin %}
+                    <span class="rgz-admin-badge">Админ</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </header>
+
+        <nav class="rgz-nav">
+            <a href="{{ url_for('rgz.index') }}" class="rgz-nav-link">Главная</a>
+            {% if rgz_user %}
+                <a href="{{ url_for('rgz.profile') }}" class="rgz-nav-link">Мой профиль</a>
+                <a href="{{ url_for('rgz.search_page') }}" class="rgz-nav-link">Поиск</a>
+                {% if rgz_user.is_admin %}
+                    <a href="{{ url_for('rgz.admin') }}" class="rgz-nav-link">Админка</a>
+                {% endif %}
+                <a href="#" onclick="logout()" class="rgz-nav-link rgz-nav-logout">Выйти</a>
+            {% else %}
+                <a href="{{ url_for('rgz.login') }}" class="rgz-nav-link">Войти</a>
+                <a href="{{ url_for('rgz.register') }}" class="rgz-nav-link">Регистрация</a>
+            {% endif %}
+        </nav>
+
+        <main class="rgz-main">
+            {% block content %}{% endblock %}
+        </main>
+
+        <footer class="rgz-footer">
+            <p>Расчетно-графическое задание по web-программированию</p>
+            <p>© 2025 Сайт знакомств РГЗ</p>
+        </footer>
+    </div>
+
+    <script>
+        async function rgzJsonRpc(endpoint, method, params = {}) {
+    try {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: method,
+                params: params,
+                id: Date.now()
+            })
+        });
+        
+        return await response.json();
+    } catch (error) {
+        console.error('JSON-RPC error:', error);
+        return { error: 'Network error' };
+    }
+}
+
+async function logout() {
+    try {
+        const response = await fetch("{{ url_for('rgz.logout') }}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                jsonrpc: "2.0",
+                method: "logout",
+                params: {},
+                id: 1
+            })
+        });
+        
+        if (response.ok) {
+            window.location.href = "{{ url_for('rgz.index') }}";
+        }
+    } catch (error) {
+        console.error('Logout error:', error);
+    }
+}
+
+        function showMessage(message, type = 'info') {
+            const alert = document.createElement('div');
+            alert.className = `rgz-alert rgz-alert-${type}`;
+            alert.textContent = message;
+            alert.style.position = 'fixed';
+            alert.style.top = '20px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '1000';
+            alert.style.padding = '15px';
+            alert.style.borderRadius = '5px';
+            alert.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+            
+            if (type === 'success') {
+                alert.style.backgroundColor = '#ff6b35';
+                alert.style.color = 'white';
+            } else if (type === 'error') {
+                alert.style.backgroundColor = '#dc3545';
+                alert.style.color = 'white';
+            } else {
+                alert.style.backgroundColor = '#ff8c5a';
+                alert.style.color = 'white';
+            }
+            
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

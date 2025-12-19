@@ -1,0 +1,77 @@
+{% extends "rgz/layout.html" %}
+
+{% block title %}Мой профиль{% endblock %}
+
+{% block content %}
+<div class="rgz-profile-container">
+    <h2>Мой профиль</h2>
+    
+    <div id="profileContent">
+        <p>Загрузка профиля...</p>
+    </div>
+    
+    <div class="rgz-profile-actions">
+        <a href="{{ url_for('rgz.edit_profile_page') }}" class="rgz-btn rgz-btn-primary">Редактировать профиль</a>
+        <button onclick="deleteAccount()" class="rgz-btn rgz-btn-danger">Удалить аккаунт</button>
+    </div>
+</div>
+
+<script>
+
+    async function loadProfile() {
+        const result = await rgzJsonRpc("{{ url_for('rgz.get_profile') }}", "get_profile", {});
+        if (result.result) {
+            const user = result.result;
+            
+            let hiddenStatus = '';
+            if (user.is_hidden) {
+                hiddenStatus = '<span class="rgz-badge rgz-badge-warning">Профиль скрыт</span>';
+            }
+            
+            document.getElementById('profileContent').innerHTML = `
+                <div class="rgz-profile-card">
+                    <div class="rgz-profile-header">
+                        <img src="${user.photo_url}" alt="Фото профиля" class="rgz-profile-photo">
+                        <div class="rgz-profile-info">
+                            <h3>${user.name} ${hiddenStatus}</h3>
+                            <p><strong>Возраст:</strong> ${user.age} лет</p>
+                            <p><strong>Пол:</strong> ${user.gender === 'male' ? 'Мужской' : 'Женский'}</p>
+                            <p><strong>Ищу:</strong> ${user.search_gender === 'male' ? 'Мужчину' : 'Женщину'}</p>
+                        </div>
+                    </div>
+                    
+                    ${user.about ? `
+                    <div class="rgz-profile-about">
+                        <h4>О себе:</h4>
+                        <p>${user.about}</p>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="rgz-profile-meta">
+                        <p><strong>Логин:</strong> ${user.login}</p>
+                        <p><strong>Зарегистрирован:</strong> ${new Date(user.created_at).toLocaleDateString('ru-RU')}</p>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    async function deleteAccount() {
+        if (!confirm('Вы уверены, что хотите удалить свой аккаунт? Это действие нельзя отменить.')) {
+            return;
+        }
+        
+        const result = await rgzJsonRpc("{{ url_for('rgz.delete_account') }}", "delete_account", {});
+        if (result.result) {
+            showMessage('Аккаунт удален', 'success');
+            setTimeout(() => {
+                window.location.href = "{{ url_for('rgz.index') }}";
+            }, 1000);
+        } else {
+            showMessage('Ошибка при удалении аккаунта', 'error');
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', loadProfile);
+</script>
+{% endblock %}

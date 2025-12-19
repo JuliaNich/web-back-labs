@@ -1,0 +1,59 @@
+{% extends "rgz/layout.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="rgz-hero">
+    <h2>Добро пожаловать на сайт знакомств</h2>
+    <p>Найдите свою вторую половинку среди наших пользователей</p>
+    
+    {% if not rgz_user %}
+    <div class="rgz-hero-actions">
+        <a href="{{ url_for('rgz.register') }}" class="rgz-btn rgz-btn-primary">Зарегистрироваться</a>
+        <a href="{{ url_for('rgz.login') }}" class="rgz-btn rgz-btn-secondary">Войти</a>
+    </div>
+    {% else %}
+    <div class="rgz-hero-actions">
+        <a href="{{ url_for('rgz.search_page') }}" class="rgz-btn rgz-btn-primary">Начать поиск</a>
+        <a href="{{ url_for('rgz.profile') }}" class="rgz-btn rgz-btn-secondary">Мой профиль</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="rgz-stats">
+    <h3>Статистика сайта</h3>
+    <div id="stats-container">
+        <p>Загрузка статистики...</p>
+    </div>
+</div>
+<script>
+    async function loadStats() {
+        const result = await rgzJsonRpc("{{ url_for('rgz.get_stats') }}", "get_stats", {});
+        if (result.result) {
+            const stats = result.result;
+            document.getElementById('stats-container').innerHTML = `
+                <div class="rgz-stats-grid">
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.total_users}</span>
+                        <span class="rgz-stat-label">Всего пользователей</span>
+                    </div>
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.male_users}</span>
+                        <span class="rgz-stat-label">Мужчин</span>
+                    </div>
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.female_users}</span>
+                        <span class="rgz-stat-label">Женщин</span>
+                    </div>
+                    <div class="rgz-stat-item">
+                        <span class="rgz-stat-number">${stats.avg_age}</span>
+                        <span class="rgz-stat-label">Средний возраст</span>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadStats);
+</script>
+{% endblock %}

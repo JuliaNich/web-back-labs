@@ -1,0 +1,200 @@
+{% extends "rgz/layout.html" %}
+
+{% block title %}Редактирование профиля{% endblock %}
+
+{% block content %}
+<div class="rgz-profile-container">
+    <h2>Редактирование профиля</h2>
+    
+    <div id="editFormContainer">
+        <p>Загрузка формы...</p>
+    </div>
+
+    <div id="uploadProgressContainer" style="display: none; margin-top: 20px;">
+        <p id="uploadStatus">Загрузка...</p>
+        <progress id="uploadProgress" value="0" max="100"></progress>
+    </div>
+</div>
+
+<script>
+    async function loadEditForm() {
+        const result = await rgzJsonRpc("{{ url_for('rgz.get_profile') }}", "get_profile", {});
+        if (result.result) {
+            const user = result.result;
+            
+            document.getElementById('editFormContainer').innerHTML = `
+                <form id="editProfileForm" class="rgz-form">
+                    <div class="rgz-form-group">
+                        <label for="name">Имя *:</label>
+                        <input type="text" id="name" name="name" value="${user.name}" required>
+                    </div>
+                    
+                    <div class="rgz-form-group">
+                        <label for="age">Возраст *:</label>
+                        <input type="number" id="age" name="age" value="${user.age}" required min="18" max="100">
+                    </div>
+                    
+                    <div class="rgz-form-group">
+                        <label>Ваш пол *:</label>
+                        <div class="rgz-radio-group">
+                            <label>
+                                <input type="radio" name="gender" value="male" ${user.gender === 'male' ? 'checked' : ''}>
+                                Мужской
+                            </label>
+                            <label>
+                                <input type="radio" name="gender" value="female" ${user.gender === 'female' ? 'checked' : ''}>
+                                Женский
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="rgz-form-group">
+                        <label>Ищу *:</label>
+                        <div class="rgz-radio-group">
+                            <label>
+                                <input type="radio" name="search_gender" value="male" ${user.search_gender === 'male' ? 'checked' : ''}>
+                                Мужчину
+                            </label>
+                            <label>
+                                <input type="radio" name="search_gender" value="female" ${user.search_gender === 'female' ? 'checked' : ''}>
+                                Женщину
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="rgz-form-group">
+                        <label for="about">О себе:</label>
+                        <textarea id="about" name="about" rows="4">${user.about || ''}</textarea>
+                    </div>
+                    
+                    <div class="rgz-form-group">
+                        <label>
+                            <input type="checkbox" id="is_hidden" name="is_hidden" ${user.is_hidden ? 'checked' : ''}>
+                            Скрыть мой профиль из поиска
+                        </label>
+                    </div>
+                    
+                    <div class="rgz-form-group">
+                        <label>Фотография профиля:</label>
+                        <div class="rgz-profile-photo-current">
+                            <img src="${user.photo_url}" alt="Текущее фото" class="rgz-photo-preview">
+                        </div>
+                        <input type="file" id="photo" name="photo" accept="image/*" onchange="previewPhoto(event)">
+                        <div id="photoPreview" class="rgz-photo-preview-container"></div>
+                    </div>
+                    
+                    <div class="rgz-form-actions">
+                        <button type="submit" class="rgz-btn rgz-btn-primary">Сохранить изменения</button>
+                        <button type="button" onclick="uploadPhoto()" class="rgz-btn rgz-btn-secondary">Загрузить фото</button>
+                        <a href="{{ url_for('rgz.profile') }}" class="rgz-btn rgz-btn-secondary">Отмена</a>
+                    </div>
+                </form>
+            `;
+
+            document.getElementById('editProfileForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = new FormData(this);
+                const data = {
+                    name: formData.get('name'),
+                    age: parseInt(formData.get('age')),
+                    gender: formData.get('gender'),
+                    search_gender: formData.get('search_gender'),
+                    about: formData.get('about') || '',
+                    is_hidden: document.getElementById('is_hidden').checked
+                };
+                
+                const result = await rgzJsonRpc("{{ url_for('rgz.edit_profile') }}", "edit_profile", data);
+                
+                if (result.result) {
+                    showMessage('Профиль обновлен!', 'success');
+                    setTimeout(() => {
+                        window.location.href = "{{ url_for('rgz.profile') }}";
+                    }, 1000);
+                } else {
+                    const errors = Array.isArray(result.error) ? result.error.join(', ') : result.error;
+                    showMessage('Ошибка: ' + errors, 'error');
+                }
+            });
+        }
+    }
+
+    function previewPhoto(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('photoPreview');
+                preview.innerHTML = `
+                    <div class="rgz-photo-preview">
+                        <img src="${e.target.result}" alt="Предпросмотр">
+                        <p>Новое фото будет загружено при нажатии "Загрузить фото"</p>
+                    </div>
+                `;
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function uploadPhoto() {
+        const fileInput = document.getElementById('photo');
+        if (!fileInput.files.length) {
+            showMessage('Выберите файл для загрузки', 'error');
+            return;
+        }
+        
+        const file = fileInput.files[0];
+
+        const progressContainer = document.getElementById('uploadProgressContainer');
+        const progressBar = document.getElementById('uploadProgress');
+        const progressText = document.getElementById('uploadStatus');
+        progressContainer.style.display = 'block';
+        progressBar.value = 25;
+        progressText.textContent = 'Начало загрузки...';
+
+        const formData = new FormData();
+        formData.append('photo', file);
+        
+         try {
+            const response = await fetch("{{ url_for('rgz.upload_photo') }}", {
+            method: 'POST',
+            body: formData
+            });   
+            
+            progressBar.value = 75;
+            progressText.textContent = 'Обработка...';
+            
+            const result = await response.json();
+            
+            if (result.result) {
+                progressBar.value = 100;
+                progressText.textContent = 'Успешно!';
+                
+                showMessage('Фото загружено успешно!', 'success');
+  
+                const preview = document.getElementById('photoPreview');
+                preview.innerHTML = `
+                    <div class="rgz-photo-preview">
+                        <img src="${result.result.photo_url}" alt="Новое фото">
+                        <p>Фото обновлено!</p>
+                    </div>
+                `;
+
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    loadEditForm();
+                }, 2000);
+                
+            } else {
+                progressContainer.style.display = 'none';
+                showMessage('Ошибка загрузки фото: ' + (result.error || 'Неизвестная ошибка'), 'error');
+            }
+        } catch (error) {
+            progressContainer.style.display = 'none';
+            showMessage('Ошибка сети: ' + error.message, 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadEditForm);
+</script>
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends "rgz/layout.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="rgz-auth-container">
+    <h2>Регистрация на сайте</h2>
+    
+    <form id="registerForm" class="rgz-form">
+        <div class="rgz-form-group">
+            <label for="login">Логин *:</label>
+            <input type="text" id="login" name="login" required 
+                   pattern="[A-Za-z0-9._\-@]+" 
+                   title="Только латинские буквы, цифры и символы ._-@" 
+                   minlength="3">
+        </div>
+        
+        <div class="rgz-form-group">
+            <label for="password">Пароль *:</label>
+            <input type="password" id="password" name="password" required minlength="6">
+        </div>
+        
+        <div class="rgz-form-group">
+            <label for="name">Имя *:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        
+        <div class="rgz-form-group">
+            <label for="age">Возраст *:</label>
+            <input type="number" id="age" name="age" required min="18" max="100" value="25">
+        </div>
+        
+        <div class="rgz-form-group">
+            <label>Ваш пол *:</label>
+            <div class="rgz-radio-group">
+                <label>
+                    <input type="radio" name="gender" value="male" checked>
+                    Мужской
+                </label>
+                <label>
+                    <input type="radio" name="gender" value="female">
+                    Женский
+                </label>
+            </div>
+        </div>
+        
+        <div class="rgz-form-group">
+            <label>Ищу *:</label>
+            <div class="rgz-radio-group">
+                <label>
+                    <input type="radio" name="search_gender" value="male">
+                    Мужчину
+                </label>
+                <label>
+                    <input type="radio" name="search_gender" value="female" checked>
+                    Женщину
+                </label>
+            </div>
+        </div>
+        
+        <div class="rgz-form-group">
+            <label for="about">О себе:</label>
+            <textarea id="about" name="about" rows="4"></textarea>
+        </div>
+        
+        <div class="rgz-form-actions">
+            <button type="submit" class="rgz-btn rgz-btn-primary">Зарегистрироваться</button>
+            <a href="{{ url_for('rgz.login') }}" class="rgz-btn rgz-btn-secondary">Уже есть аккаунт?</a>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            login: formData.get('login'),
+            password: formData.get('password'),
+            name: formData.get('name'),
+            age: parseInt(formData.get('age')),
+            gender: formData.get('gender'),
+            search_gender: formData.get('search_gender'),
+            about: formData.get('about') || ''
+        };
+        
+        const result = await rgzJsonRpc("{{ url_for('rgz.register') }}", "register", data);
+        
+        if (result.result) {
+            showMessage('Регистрация успешна! Теперь войдите в систему.', 'success');
+            setTimeout(() => {
+                window.location.href = "{{ url_for('rgz.login') }}";
+            }, 2000);
+        } else {
+            const errors = Array.isArray(result.error) ? result.error.join(', ') : result.error;
+            showMessage('Ошибка регистрации: ' + errors, 'error');
+        }
+    });
+</script>
+{% endblock %}

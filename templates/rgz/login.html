@@ -1,0 +1,57 @@
+{% extends "rgz/layout.html" %}
+
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+<div class="rgz-auth-container">
+    <h2>Вход в систему РГЗ</h2>
+    
+    <form id="loginForm" class="rgz-form">
+        <div class="rgz-form-group">
+            <label for="login">Логин:</label>
+            <input type="text" id="login" name="login" required 
+                   pattern="[A-Za-z0-9._\-@]+" 
+                   title="Только латинские буквы, цифры и символы ._-@">
+        </div>
+        
+        <div class="rgz-form-group">
+            <label for="password">Пароль:</label>
+            <input type="password" id="password" name="password" required minlength="6">
+        </div>
+        
+        <div class="rgz-form-actions">
+            <button type="submit" class="rgz-btn rgz-btn-primary">Войти</button>
+            <a href="{{ url_for('rgz.register') }}" class="rgz-btn rgz-btn-secondary">Регистрация</a>
+        </div>
+    </form>
+    
+    <div class="rgz-test-credentials">
+        <p><strong>Тестовый аккаунт:</strong></p>
+        <p>Логин: <code>admin</code></p>
+        <p>Пароль: <code>admin123</code></p>
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = {
+            login: formData.get('login'),
+            password: formData.get('password')
+        };
+        
+        const result = await rgzJsonRpc("{{ url_for('rgz.login') }}", "login", data);
+        
+        if (result.result) {
+            showMessage('Вход выполнен успешно!', 'success');
+            setTimeout(() => {
+                window.location.href = "{{ url_for('rgz.profile') }}";
+            }, 1000);
+        } else {
+            showMessage(result.error || 'Ошибка входа', 'error');
+        }
+    });
+</script>
+{% endblock %}
