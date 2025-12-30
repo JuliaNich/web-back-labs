@@ -35,12 +35,17 @@
             color: #f042ca;
         }
     </style>
-    <h1>База знаний</h1>
+    
     <div class="lab8-menu">
-        <a href="/lab8/register">Регистрация</a>
         <div class="nav-links">
-            
+                <a href="/lab8/articles/">Список статей</a>
+                <a href="/lab8/login">Вход</a>
+                <a href="/lab8/register">Регистрация</a>
         </div>
-        <strong>{{ login if login else 'Anonymous' }}</strong>
+        <div class="username">
+            Пользователь: {{ username }}
         </div>
+    </div>
+    
+    <h1>База знаний</h1>
 {% endblock %}
