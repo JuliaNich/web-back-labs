@@ -88,6 +88,7 @@ def create_article():
     article_text = request.form.get('article_text')
     is_favorite = request.form.get('is_favorite') == 'on'
     is_public = request.form.get('is_public') == 'on'
+    likes = request.form.get('likes', 0, type=int)
     
     if not title or not article_text:
         return render_template('lab8/create_article.html',
@@ -98,7 +99,8 @@ def create_article():
         title=title,
         article_text=article_text,
         is_favorite=is_favorite,
-        is_public=is_public
+        is_public=is_public,
+        likes=likes
     )
     
     db.session.add(new_article)
@@ -110,7 +112,8 @@ def create_article():
 @login_required
 def edit_article(article_id):
     article = articles.query.get_or_404(article_id)
-
+    
+    # Проверяем, что пользователь редактирует свою статью
     if article.login_id != current_user.id:
         return "Вы не можете редактировать чужую статью", 403
     
@@ -121,6 +124,7 @@ def edit_article(article_id):
     article_text = request.form.get('article_text')
     is_favorite = request.form.get('is_favorite') == 'on'
     is_public = request.form.get('is_public') == 'on'
+    likes = request.form.get('likes', 0, type=int)
     
     if not title or not article_text:
         return render_template('lab8/edit_article.html', 
@@ -131,6 +135,7 @@ def edit_article(article_id):
     article.article_text = article_text
     article.is_favorite = is_favorite
     article.is_public = is_public
+    article.likes = likes
     
     db.session.commit()
     
@@ -148,3 +153,11 @@ def delete_article(article_id):
     db.session.commit()
     
     return redirect('/lab8/articles/')
+
+@lab8.route('/lab8/public_articles')
+def public_articles():
+    public_articles_list = articles.query.filter_by(is_public=True).all()
+    
+    return render_template('lab8/public_articles.html', 
+                          articles=public_articles_list,
+                          current_user=current_user)

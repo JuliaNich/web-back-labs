@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 8 - Публичные статьи{% endblock %}
+
+{% block main %}
+    <h1>Публичные статьи</h1>
+
+    {% if articles %}
+        <ul>
+            {% for article in articles %}
+                <li>
+                    <h3>{{ article.title }}</h3>
+                    <p>{{ article.article_text[:200] }}{% if article.article_text|length > 200 %}...{% endif %}</p>
+                    <small>
+                        Автор ID: {{ article.login_id }} | 
+                        Избранное: {{ 'Да' if article.is_favorite else 'Нет' }} | 
+                        Лайков: {{ article.likes }} |
+                    </small>
+                    
+                    {% if current_user.is_authenticated and article.login_id == current_user.id %}
+                        <div>
+                            <small>(Ваша статья)</small>
+                            <a href="/lab8/edit/{{ article.id }}">Редактировать</a>
+                        </div>
+                    {% endif %}
+                    <hr>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Пока нет публичных статей.</p>
+    {% endif %}
+    
+    <p><a href="/lab8/">На главную</a></p>
+{% endblock %}

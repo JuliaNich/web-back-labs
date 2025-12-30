@@ -16,6 +16,7 @@
                     <small>
                         Избранное: {{ 'Да' if article.is_favorite else 'Нет' }} | 
                         Публичная: {{ 'Да' if article.is_public else 'Нет' }} | 
+                        Лайков: {{ article.likes }}
                     </small>
                     <div>
                         <a href="/lab8/edit/{{ article.id }}">Редактировать</a>
