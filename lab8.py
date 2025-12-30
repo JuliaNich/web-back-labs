@@ -105,3 +105,46 @@ def create_article():
     db.session.commit()
     
     return redirect('/lab8/articles/')
+
+@lab8.route('/lab8/edit/<int:article_id>', methods=['GET', 'POST'])
+@login_required
+def edit_article(article_id):
+    article = articles.query.get_or_404(article_id)
+
+    if article.login_id != current_user.id:
+        return "Вы не можете редактировать чужую статью", 403
+    
+    if request.method == 'GET':
+        return render_template('lab8/edit_article.html', article=article)
+    
+    title = request.form.get('title')
+    article_text = request.form.get('article_text')
+    is_favorite = request.form.get('is_favorite') == 'on'
+    is_public = request.form.get('is_public') == 'on'
+    
+    if not title or not article_text:
+        return render_template('lab8/edit_article.html', 
+                               article=article,
+                               error='Заголовок и текст статьи обязательны')
+    
+    article.title = title
+    article.article_text = article_text
+    article.is_favorite = is_favorite
+    article.is_public = is_public
+    
+    db.session.commit()
+    
+    return redirect('/lab8/articles/')
+
+@lab8.route('/lab8/delete/<int:article_id>')
+@login_required
+def delete_article(article_id):
+    article = articles.query.get_or_404(article_id)
+
+    if article.login_id != current_user.id:
+        return "Вы не можете удалить чужую статью", 403
+    
+    db.session.delete(article)
+    db.session.commit()
+    
+    return redirect('/lab8/articles/')
