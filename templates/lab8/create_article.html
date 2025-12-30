@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 8{% endblock %}
+
+{% block main %}
+    <h1>Создание статьи</h1>
+
+    {% if error %}
+        <div style="color: red; padding: 10px; border: 1px solid red; margin-bottom: 15px;">
+            {{ error }}
+        </div>
+    {% endif %}
+
+    <form action="/lab8/create" method="post">
+        <div>
+            <label>
+                Заголовок: <input type="text" name="title" style="width: 300px;">
+            </label>
+        </div>
+
+        <div>
+            <label>
+                Текст статьи:<br>
+                <textarea name="article_text" rows="10" cols="50"></textarea>
+            </label>
+        </div>
+
+        <div>
+            <label>
+                <input type="checkbox" name="is_favorite"> Избранное
+            </label>
+        </div>
+
+        <div>
+            <label>
+                <input type="checkbox" name="is_public"> Публичная статья
+            </label>
+        </div>
+
+        <button type="submit">Создать статью</button>
+    </form>
+{% endblock %}
