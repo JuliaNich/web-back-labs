@@ -45,6 +45,7 @@ from lab6 import lab6
 from lab7 import lab7
 from rgz import rgz
 from lab8 import lab8
+from lab9 import lab9
 
 app.register_blueprint(lab1)
 app.register_blueprint(lab2)
@@ -55,6 +56,7 @@ app.register_blueprint(lab6)
 app.register_blueprint(lab7)
 app.register_blueprint(rgz, url_prefix='/rgz')
 app.register_blueprint(lab8)
+app.register_blueprint(lab9)
 
 log_404 = []
 
@@ -136,6 +138,7 @@ def index():
         ('lab6', 'Лабораторная №6', 'lab6.lab'),
         ('lab7', 'Лабораторная №7', 'lab7.lab'),
         ('lab8', 'Лабораторная №8', 'lab8.lab'),
+        ('lab9', 'Лабораторная №9', 'lab9.main'),
     ]
     
     for bp_name, bp_text, endpoint in blueprints_to_check:
