@@ -56,15 +56,14 @@ def login():
                                error='Логин и пароль не могут быть пустыми')
     
     user = users.query.filter_by(login=login_form).first()
-    
-    if user and check_password_hash(user.password, password_form):
 
-        login_user(user, remember=False)
+    if user and check_password_hash(user.password, password_form):
+        remember = request.form.get('remember') == 'on'  
+        login_user(user, remember=remember)             
         return redirect('/lab8/')
     
     return render_template('lab8/login.html',
                            error='Ошибка входа: логин и/или пароль неверны')
-
 @lab8.route('/lab8/articles/')
 @login_required
 def article_list():
