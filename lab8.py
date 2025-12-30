@@ -161,3 +161,38 @@ def public_articles():
     return render_template('lab8/public_articles.html', 
                           articles=public_articles_list,
                           current_user=current_user)
+
+@lab8.route('/lab8/search')
+def search_articles():
+    query = request.args.get('q', '').strip()
+    only_mine = request.args.get('only_mine') == 'on'
+    
+    if not query:
+        return render_template('lab8/search.html', 
+                              query=None, 
+                              articles=[], 
+                              only_mine=only_mine)
+
+    if current_user.is_authenticated:
+
+        base_query = articles.query.filter(
+            (articles.is_public == True) | (articles.login_id == current_user.id)
+        )
+    else:
+
+        base_query = articles.query.filter_by(is_public=True)
+
+    if current_user.is_authenticated and only_mine:
+        base_query = articles.query.filter_by(login_id=current_user.id)
+  
+    search_results = base_query.filter(
+        db.or_(
+            articles.title.ilike(f'%{query}%'), 
+            articles.article_text.ilike(f'%{query}%')
+        )
+    ).all()
+    
+    return render_template('lab8/search.html', 
+                          query=query, 
+                          articles=search_results, 
+                          only_mine=only_mine)

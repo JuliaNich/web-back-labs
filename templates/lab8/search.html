@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block lab %}Лабораторная работа 8 - Поиск статей{% endblock %}
+
+{% block main %}
+    <h1>Поиск по статьям</h1>
+    
+    <form action="/lab8/search" method="get">
+        <div>
+            <label>
+                Поисковая строка: 
+                <input type="text" name="q" value="{{ query if query else '' }}" style="width: 300px;">
+            </label>
+        </div>
+        
+        <div>
+            <label>
+                <input type="checkbox" name="only_mine" {% if only_mine %}checked{% endif %}>
+                Только мои статьи (для авторизованных пользователей)
+            </label>
+        </div>
+        
+        <button type="submit">Искать</button>
+    </form>
+    
+    {% if query %}
+        <h2>Результаты поиска для "{{ query }}":</h2>
+        
+        {% if articles %}
+            <p>Найдено статей: {{ articles|length }}</p>
+            
+            <ul>
+                {% for article in articles %}
+                    <li>
+                        <h3>{{ article.title }}</h3>
+                        <p>{{ article.article_text[:150] }}{% if article.article_text|length > 150 %}...{% endif %}</p>
+                        <small>
+                            Автор ID: {{ article.login_id }} | 
+                            Публичная: {{ 'Да' if article.is_public else 'Нет' }} | 
+                            {% if article.login_id == current_user.id %}
+                                <strong>(Ваша статья)</strong>
+                            {% endif %}
+                        </small>
+                        <hr>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Статьи по запросу "{{ query }}" не найдены.</p>
+        {% endif %}
+    {% endif %}
+    
+    <p><a href="/lab8/">На главную</a></p>
+{% endblock %}
