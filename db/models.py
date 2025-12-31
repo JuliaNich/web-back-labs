@@ -22,5 +22,6 @@ class gifts(db.Model):
     is_opened = db.Column(db.Boolean, default=False)
     opened_at = db.Column(db.DateTime)
     position_data = db.Column(db.Text, nullable=False)
+    auth_only = db.Column(db.Boolean, default=False)
     
     __table_args__ = (db.UniqueConstraint('user_id', 'gift_number', name='unique_user_gift'),)

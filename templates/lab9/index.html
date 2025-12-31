@@ -31,6 +31,10 @@ body {
     cursor: pointer;
 }
 
+.locked {
+    opacity: 0.4;
+}
+
 #info {
     margin-top: 30px;
     min-height: 120px;
@@ -47,94 +51,79 @@ body {
     <h2>🎁 Новогодние подарки</h2>
     <p>Осталось коробок: <span id="remaining">10</span></p>
 
+    <button id="santa" style="display:none;">🎅 Дед Мороз</button>
+
     <div id="error"></div>
     <div id="field"></div>
-
     <div id="info"></div>
 </div>
+
 <script>
 function getImage(name) {
-    return `/static/lab9/images/${name}.jpg`;
+     return `/static/lab9/images/${name}.jpg`;
 }
 
 async function loadGifts() {
-    try {
-        const res = await fetch('/lab9/api/gifts');
-        const data = await res.json();
+    const res = await fetch('/lab9/api/gifts');
+    const data = await res.json();
 
-        document.getElementById('remaining').textContent = data.remaining;
+    document.getElementById('remaining').textContent = data.remaining;
 
-        const field = document.getElementById('field');
-        field.innerHTML = '';
-
-        data.gifts.forEach(g => {
-            const el = document.createElement('img');
-            el.className = 'gift';
-            el.style.top = g.top + '%';
-            el.style.left = g.left + '%';
-
-            if (g.opened) {
-                el.src = getImage('opened');
-                el.style.cursor = 'default';
-                el.style.opacity = '0.5';
-            } else {
-                el.src = getImage('gift' + g.number);
-                el.style.cursor = 'pointer';
-                el.onclick = () => openGift(g.number, el);
-            }
-
-            el.onerror = function() {
-                console.log('Картинка не найдена:', this.src);
-                this.style.display = 'none';
-                const emoji = document.createElement('div');
-                emoji.textContent = '🎁';
-                emoji.style.position = 'absolute';
-                emoji.style.top = g.top + '%';
-                emoji.style.left = g.left + '%';
-                emoji.style.fontSize = '40px';
-                field.appendChild(emoji);
-            };
-
-            field.appendChild(el);
-        });
-    } catch (err) {
-        console.error('Error:', err);
-        document.getElementById('error').textContent = 'Ошибка загрузки';
+    if (data.is_auth) {
+        document.getElementById('santa').style.display = 'inline-block';
     }
+
+    const field = document.getElementById('field');
+    field.innerHTML = '';
+
+    data.gifts.forEach(g => {
+        const el = document.createElement('img');
+        el.className = 'gift';
+        el.style.top = g.top + '%';
+        el.style.left = g.left + '%';
+
+        if (g.opened) {
+            el.src = getImage('opened');
+            el.style.opacity = '0.5';
+        } else if (g.auth_only && !data.is_auth) {
+            el.src = getImage('gift' + g.number);
+            el.classList.add('locked');
+            el.onclick = () => alert('🔒 Только для авторизованных');
+        } else {
+            el.src = getImage('gift' + g.number);
+            el.onclick = () => openGift(g.number, el);
+        }
+
+        field.appendChild(el);
+    });
 }
 
 async function openGift(number, el) {
-    try {
-        const res = await fetch('/lab9/api/open', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({number: number})
-        });
-        
-        const data = await res.json();
+    const res = await fetch('/lab9/api/open', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({number: number})
+    });
 
-        if (!data.success) {
-            document.getElementById('error').textContent = data.error;
-            return;
-        }
+    const data = await res.json();
 
-        el.src = getImage('opened');
-        el.onclick = null;
-        el.style.cursor = 'default';
-        el.style.opacity = '0.5';
-
-        document.getElementById('info').innerHTML = `
-            <img src="${getImage('opened_gift' + number)}" width="100" 
-                 onerror="this.src='${getImage('opened')}'"><br>
-            <strong>${data.message}</strong>
-        `;
-
-        loadGifts();
-    } catch (err) {
-        console.error('Error:', err);
-        document.getElementById('error').textContent = 'Ошибка открытия';
+    if (!data.success) {
+        document.getElementById('error').textContent = data.error;
+        return;
     }
+
+    document.getElementById('info').innerHTML = `
+        <img src="${getImage('opened_gift' + number)}" width="100"><br>
+        <strong>${data.message}</strong>
+    `;
+
+    loadGifts();
 }
+
+document.getElementById('santa').onclick = async () => {
+    await fetch('/lab9/api/reset', {method: 'POST'});
+    loadGifts();
+};
 
 loadGifts();
 </script>

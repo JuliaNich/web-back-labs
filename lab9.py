@@ -3,6 +3,7 @@ import json
 from flask import Blueprint, render_template, request, jsonify, session
 from db import db
 from db.models import gifts
+from flask_login import current_user, login_required
 
 lab9 = Blueprint('lab9', __name__)
 
@@ -24,6 +25,7 @@ CONGRATULATIONS = [
 def main():
     return render_template('lab9/index.html')
 
+
 @lab9.route('/lab9/api/gifts')
 def api_gifts():
     try:
@@ -39,15 +41,13 @@ def api_gifts():
                     user_id=None,
                     gift_number=i + 1,
                     is_opened=False,
+                    auth_only=(i >= 7),  
                     position_data=json.dumps(pos)
                 ))
             db.session.commit()
             gifts_list = gifts.query.filter_by(user_id=None).all()
 
-        opened_count = session.get('opened_count', 0)
-
         opened_in_db = sum(1 for g in gifts_list if g.is_opened)
-
         if opened_in_db == 0:
             session['opened_count'] = 0
 
@@ -57,11 +57,13 @@ def api_gifts():
                 {
                     'number': g.gift_number,
                     'opened': g.is_opened,
+                    'auth_only': g.auth_only,
                     **json.loads(g.position_data)
                 } for g in gifts_list
             ],
-            'opened_count': opened_count,
-            'remaining': 10 - sum(g.is_opened for g in gifts_list)
+            'opened_count': session.get('opened_count', 0),
+            'remaining': 10 - opened_in_db,
+            'is_auth': current_user.is_authenticated
         })
 
     except Exception as e:
@@ -82,6 +84,12 @@ def api_open():
             gift_number=number
         ).first()
 
+        if not gift:
+            return jsonify({'success': False, 'error': 'Коробка не найдена'})
+
+        if gift.auth_only and not current_user.is_authenticated:
+            return jsonify({'success': False, 'error': 'Этот подарок только для авторизованных'})
+
         if gift.is_opened:
             return jsonify({'success': False, 'error': 'Коробка уже пустая'})
 
@@ -97,3 +105,12 @@ def api_open():
 
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@lab9.route('/lab9/api/reset', methods=['POST'])
+@login_required
+def reset_gifts():
+    gifts.query.update({gifts.is_opened: False})
+    session['opened_count'] = 0
+    db.session.commit()
+    return jsonify({'success': True})
