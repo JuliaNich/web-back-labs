@@ -14,3 +14,13 @@ class articles(db.Model):
     is_favorite = db.Column(db.Boolean)
     is_public = db.Column(db.Boolean)
     likes = db.Column(db.Integer)
+
+class gifts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    gift_number = db.Column(db.Integer, nullable=False)  
+    is_opened = db.Column(db.Boolean, default=False)
+    opened_at = db.Column(db.DateTime)
+    position_data = db.Column(db.Text, nullable=False)
+    
+    __table_args__ = (db.UniqueConstraint('user_id', 'gift_number', name='unique_user_gift'),)

@@ -1,9 +1,142 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Новогодние подарки</title>
 
-{% block lab %}Лабораторная работа 9{% endblock %}
+<style>
+body {
+    background: #fde7f3;
+    font-family: Arial;
+    margin: 0;
+}
 
-{% block script %}{% endblock %}
+.container {
+    padding: 20px;
+    text-align: center;
+}
 
-{% block main %}
-<h1>Поздравления</h1>
-{% endblock %}
+#field {
+    position: relative;
+    width: 90vw;
+    height: 60vh;
+    margin: 0 auto;
+    border: 2px solid #e6a6c7;
+    background: #fff;
+}
+
+.gift {
+    position: absolute;
+    width: 60px;
+    cursor: pointer;
+}
+
+#info {
+    margin-top: 30px;
+    min-height: 120px;
+}
+
+#error {
+    color: red;
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+    <h2>🎁 Новогодние подарки</h2>
+    <p>Осталось коробок: <span id="remaining">10</span></p>
+
+    <div id="error"></div>
+    <div id="field"></div>
+
+    <div id="info"></div>
+</div>
+<script>
+function getImage(name) {
+    return `/static/lab9/images/${name}.jpg`;
+}
+
+async function loadGifts() {
+    try {
+        const res = await fetch('/lab9/api/gifts');
+        const data = await res.json();
+
+        document.getElementById('remaining').textContent = data.remaining;
+
+        const field = document.getElementById('field');
+        field.innerHTML = '';
+
+        data.gifts.forEach(g => {
+            const el = document.createElement('img');
+            el.className = 'gift';
+            el.style.top = g.top + '%';
+            el.style.left = g.left + '%';
+
+            if (g.opened) {
+                el.src = getImage('opened');
+                el.style.cursor = 'default';
+                el.style.opacity = '0.5';
+            } else {
+                el.src = getImage('gift' + g.number);
+                el.style.cursor = 'pointer';
+                el.onclick = () => openGift(g.number, el);
+            }
+
+            el.onerror = function() {
+                console.log('Картинка не найдена:', this.src);
+                this.style.display = 'none';
+                const emoji = document.createElement('div');
+                emoji.textContent = '🎁';
+                emoji.style.position = 'absolute';
+                emoji.style.top = g.top + '%';
+                emoji.style.left = g.left + '%';
+                emoji.style.fontSize = '40px';
+                field.appendChild(emoji);
+            };
+
+            field.appendChild(el);
+        });
+    } catch (err) {
+        console.error('Error:', err);
+        document.getElementById('error').textContent = 'Ошибка загрузки';
+    }
+}
+
+async function openGift(number, el) {
+    try {
+        const res = await fetch('/lab9/api/open', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({number: number})
+        });
+        
+        const data = await res.json();
+
+        if (!data.success) {
+            document.getElementById('error').textContent = data.error;
+            return;
+        }
+
+        el.src = getImage('opened');
+        el.onclick = null;
+        el.style.cursor = 'default';
+        el.style.opacity = '0.5';
+
+        document.getElementById('info').innerHTML = `
+            <img src="${getImage('opened_gift' + number)}" width="100" 
+                 onerror="this.src='${getImage('opened')}'"><br>
+            <strong>${data.message}</strong>
+        `;
+
+        loadGifts();
+    } catch (err) {
+        console.error('Error:', err);
+        document.getElementById('error').textContent = 'Ошибка открытия';
+    }
+}
+
+loadGifts();
+</script>
+</body>
+</html>
